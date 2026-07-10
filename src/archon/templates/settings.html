@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Archon One Settings Manager</title>
+    <style>
+        :root {
+            --bg-color: #FFFFFF;
+            --card-color: #F8F9FA;
+            --text-color: #212529;
+            --primary-btn: #212529;
+            --primary-btn-hover: #000000;
+            --secondary-btn: #FFFFFF;
+            --border-color: #DEE2E6;
+            --critical-color: #E53935;
+            --warning-color: #FB8C00;
+            --success-color: #4CAF50;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 250px;
+            border-right: 1px solid var(--border-color);
+            background-color: var(--card-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-brand {
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 0 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-container {
+            padding: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: var(--border-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-btn);
+            color: var(--bg-color);
+        }
+
+        /* Main content layout */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Sticky Header */
+        .header {
+            height: 70px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            background-color: var(--bg-color);
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Scrollable Options */
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .page-card {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .page-card.active {
+            display: flex;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-btn);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Option layout */
+        .card {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .option-label {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .option-desc {
+            font-size: 0.8125rem;
+            color: var(--text-color);
+            opacity: 0.75;
+        }
+
+        /* Input Controls */
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9375rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-btn);
+            color: var(--bg-color);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-btn);
+            color: var(--primary-btn);
+            border: 1px solid var(--primary-btn);
+        }
+
+        .btn-critical {
+            background-color: var(--critical-color);
+            color: var(--bg-color);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 5px;
+            font-size: 0.8rem;
+            background-color: var(--border-color);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+        }
+
+        /* Status bar Footer */
+        .footer {
+            height: 40px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            font-size: 0.8125rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+        }
+
+        .status-dot.dirty {
+            background-color: var(--warning-color);
+        }
+
+        .status-dot.error {
+            background-color: var(--critical-color);
+        }
+
+        /* Notifications */
+        .notification-toast {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">Archon One</div>
+        <div class="search-container">
+            <input type="text" id="search-box" class="search-input" placeholder="Search settings...">
+        </div>
+        <ul class="nav-links">
+            <li class="nav-link active" onclick="switchPage('page-general', this)">General</li>
+            <li class="nav-link" onclick="switchPage('page-modules', this)">Scan Modules</li>
+            <li class="nav-link" onclick="switchPage('page-output', this)">Output</li>
+            <li class="nav-link" onclick="switchPage('page-ignore', this)">Ignore Rules</li>
+            <li class="nav-link" onclick="switchPage('page-thresholds', this)">Thresholds</li>
+            <li class="nav-link" onclick="switchPage('page-security', this)">Security</li>
+            <li class="nav-link" onclick="switchPage('page-performance', this)">Performance</li>
+            <li class="nav-link" onclick="switchPage('page-advanced', this)">Advanced</li>
+            <li class="nav-link" onclick="switchPage('page-about', this)">About</li>
+        </ul>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <!-- Notification toast -->
+        <div id="toast" class="notification-toast"></div>
+
+        <!-- Sticky Header -->
+        <div class="header">
+            <div class="header-title" id="project-header">Project Settings</div>
+            <div class="header-buttons">
+                <button class="btn btn-secondary" onclick="exportConfig()">Export Config</button>
+                <button class="btn btn-secondary" onclick="triggerImport()">Import Config</button>
+                <input type="file" id="import-file" style="display:none" onchange="importConfig(event)">
+                <button class="btn btn-secondary" onclick="resetPage()">Reset Page</button>
+                <button class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
+                <button class="btn btn-critical" onclick="shutdownServer()">Shutdown Server</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <form id="config-form" oninput="markDirty()">
+                
+                <!-- Page 1: General -->
+                <div id="page-general" class="page-card active">
+                    <div class="section-title">General Settings</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <label class="option-label">Project Name <span class="tooltip" title="Give your repository scan configuration a friendly name">?</span></label>
+                            <input type="text" name="general.project_name" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Output Folder <span class="tooltip" title="Directory path to save reports. Supports relative folder names or full absolute paths (e.g., C:\\reports).">?</span></label>
+                            <input type="text" name="general.output_folder" required>
+                            <div class="option-desc">Relative to repository root, or enter an absolute path.</div>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="general.create_timestamp_folder" id="create-timestamp">
+                            <label for="create-timestamp" class="option-label">Create Timestamp Folder</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Default Scan Location</label>
+                            <input type="text" name="general.default_scan_location" required>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="general.auto_load_previous_config" id="auto-load-prev">
+                            <label for="auto-load-prev" class="option-label">Auto Load Previous Config</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="general.auto_save_settings" id="auto-save-sets">
+                            <label for="auto-save-sets" class="option-label">Auto Save Settings</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="general.auto_open_report_folder" id="auto-open">
+                            <label for="auto-open" class="option-label">Auto Open Report Folder</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="general.enable_scan_summary" id="enable-sum">
+                            <label for="enable-sum" class="option-label">Enable Scan Summary</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Scan History</label>
+                            <input type="number" name="general.max_scan_history" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Language Detection Mode</label>
+                            <select name="general.language_detection">
+                                <option value="auto">Auto Detect</option>
+                                <option value="manual">Manual Mapping</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 2: Scan Modules -->
+                <div id="page-modules" class="page-card">
+                    <div class="section-title">Scan Modules</div>
+                    <div class="card">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.code_metrics" id="mod-metrics">
+                            <label for="mod-metrics" class="option-label">Code Metrics (Module 01)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.security" id="mod-sec">
+                            <label for="mod-sec" class="option-label">Security Checkers (Module 02)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.code_analysis" id="mod-analysis">
+                            <label for="mod-analysis" class="option-label">Code Analysis (Module 03)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.contributor_analysis" id="mod-contrib">
+                            <label for="mod-contrib" class="option-label">Contributor Analysis (Module 04)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.repository_intelligence" id="mod-intel">
+                            <label for="mod-intel" class="option-label">Repository Intelligence (Module 05)</label>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.run_selected_only" id="run-sel">
+                            <label for="run-sel" class="option-label">Run Selected Only</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 3: Output -->
+                <div id="page-output" class="page-card">
+                    <div class="section-title">Output Configuration</div>
+                    <div class="card">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="output.txt" id="out-txt">
+                            <label for="out-txt" class="option-label">Generate TXT Reports</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="output.json" id="out-json">
+                            <label for="out-json" class="option-label">Generate JSON Datasets</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="output.md" id="out-md">
+                            <label for="out-md" class="option-label">Generate MD Reports</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Output Table Format</label>
+                            <select name="output.output_tables">
+                                <option value="ASCII">Standard ASCII</option>
+                                <option value="Compact">Compact / Borderless</option>
+                                <option value="Expanded">Expanded / Markdown</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Sort Reports By</label>
+                            <select name="output.sort_reports_by">
+                                <option value="Severity">Risk / Severity</option>
+                                <option value="Name">Alphabetical Name</option>
+                                <option value="Score">Score / Grade</option>
+                                <option value="Complexity">Cyclomatic Complexity</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Rows Per Report</label>
+                            <input type="number" name="output.max_rows_per_report" min="1" required>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="output.show_empty_reports" id="show-empty">
+                            <label for="show-empty" class="option-label">Show Empty Reports</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="output.compress_reports" id="compress">
+                            <label for="compress" class="option-label">Compress Output Reports (.zip)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="output.overwrite_existing_reports" id="overwrite">
+                            <label for="overwrite" class="option-label">Overwrite Existing Reports</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 4: Ignore Rules -->
+                <div id="page-ignore" class="page-card">
+                    <div class="section-title">Ignore Rules</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <label class="option-label">Ignore Directories (Comma separated)</label>
+                            <textarea name="ignore_rules.ignore_directories" rows="3"></textarea>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Ignore Files (Comma separated, e.g. *.min.js)</label>
+                            <textarea name="ignore_rules.ignore_files" rows="3"></textarea>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Ignore Extensions (Comma separated)</label>
+                            <input type="text" name="ignore_rules.ignore_extensions">
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_hidden_files" id="ignore-hidden-files">
+                            <label for="ignore-hidden-files" class="option-label">Ignore Hidden Files</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_hidden_directories" id="ignore-hidden-dirs">
+                            <label for="ignore-hidden-dirs" class="option-label">Ignore Hidden Directories</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_binary_files" id="ignore-binary">
+                            <label for="ignore-binary" class="option-label">Ignore Binary Files</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_generated_files" id="ignore-generated">
+                            <label for="ignore-generated" class="option-label">Ignore Generated Files</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_vendor_libraries" id="ignore-vendor">
+                            <label for="ignore-vendor" class="option-label">Ignore Vendor Libraries</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_test_files" id="ignore-test">
+                            <label for="ignore-test" class="option-label">Ignore Test Files</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_documentation" id="ignore-doc">
+                            <label for="ignore-doc" class="option-label">Ignore Documentation</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_empty_files" id="ignore-empty">
+                            <label for="ignore-empty" class="option-label">Ignore Empty Files</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="ignore_rules.ignore_large_files" id="ignore-large">
+                            <label for="ignore-large" class="option-label">Ignore Large Files</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum File Size (Bytes)</label>
+                            <input type="number" name="ignore_rules.max_file_size" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Directory Depth</label>
+                            <input type="number" name="ignore_rules.max_directory_depth" min="1" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 5: Thresholds -->
+                <div id="page-thresholds" class="page-card">
+                    <div class="section-title">Complexity & Code Thresholds</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <label class="option-label">Maximum Function Length (LOC)</label>
+                            <input type="number" name="thresholds.max_function_length" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Class Length (LOC)</label>
+                            <input type="number" name="thresholds.max_class_length" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum File Length (LOC)</label>
+                            <input type="number" name="thresholds.max_file_length" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Parameters</label>
+                            <input type="number" name="thresholds.max_parameters" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Cyclomatic Complexity</label>
+                            <input type="number" name="thresholds.max_cyclomatic_complexity" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Cognitive Complexity</label>
+                            <input type="number" name="thresholds.max_cognitive_complexity" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Nesting Depth</label>
+                            <input type="number" name="thresholds.max_nesting_depth" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Line Length</label>
+                            <input type="number" name="thresholds.max_line_length" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Duplicate Percentage</label>
+                            <input type="number" name="thresholds.max_duplicate_percentage" min="0" max="100" step="0.1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Duplicate Lines</label>
+                            <input type="number" name="thresholds.max_duplicate_lines" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Minimum Comment Density (%)</label>
+                            <input type="number" name="thresholds.min_comment_density" min="0" max="100" step="0.1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Minimum Maintainability Score</label>
+                            <input type="number" name="thresholds.min_maintainability_score" min="0" max="100" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Technical Debt Score</label>
+                            <input type="number" name="thresholds.max_technical_debt_score" min="0" max="100" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Dependency Depth</label>
+                            <input type="number" name="thresholds.max_dependency_depth" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Import Count</label>
+                            <input type="number" name="thresholds.max_import_count" min="1" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 6: Security -->
+                <div id="page-security" class="page-card">
+                    <div class="section-title">Security & Vulnerability Thresholds</div>
+                    <div class="card">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_secret_detection" id="sec-secrets">
+                            <label for="sec-secrets" class="option-label">Enable Secret Detection</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_config_scan" id="sec-configs">
+                            <label for="sec-configs" class="option-label">Enable Config Scan</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_dependency_scan" id="sec-deps">
+                            <label for="sec-deps" class="option-label">Enable Dependency Scan</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_credential_scan" id="sec-creds">
+                            <label for="sec-creds" class="option-label">Enable Credential Scan</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_dangerous_function_detection" id="sec-dang">
+                            <label for="sec-dang" class="option-label">Enable Dangerous Function Detection</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_hardcoded_ip_detection" id="sec-ip">
+                            <label for="sec-ip" class="option-label">Enable Hardcoded IP Detection</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_base64_detection" id="sec-b64">
+                            <label for="sec-b64" class="option-label">Enable Base64 Detection</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_weak_crypto_detection" id="sec-crypto">
+                            <label for="sec-crypto" class="option-label">Enable Weak Crypto Detection</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_regex_scan" id="sec-regex">
+                            <label for="sec-regex" class="option-label">Enable Regex Scan</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.enable_environment_scan" id="sec-env">
+                            <label for="sec-env" class="option-label">Enable Environment Scan</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Minimum Finding Severity</label>
+                            <select name="security.minimum_severity">
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Secret Length</label>
+                            <input type="number" name="security.max_secret_length" min="1" required>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="security.ignore_example_secrets" id="sec-ignore-ex">
+                            <label for="sec-ignore-ex" class="option-label">Ignore Example Secrets</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 7: Performance -->
+                <div id="page-performance" class="page-card">
+                    <div class="section-title">Performance Options</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <label class="option-label">Maximum Worker Threads</label>
+                            <input type="number" name="performance.max_worker_threads" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Memory Usage (MB)</label>
+                            <input type="number" name="performance.max_memory_usage" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Files to Scan</label>
+                            <input type="number" name="performance.max_files" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Scan Time (Seconds)</label>
+                            <input type="number" name="performance.max_scan_time" min="1" required>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="performance.enable_cache" id="perf-cache">
+                            <label for="perf-cache" class="option-label">Enable Cache</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Cache Size (Files)</label>
+                            <input type="number" name="performance.cache_size" min="1" required>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="performance.incremental_scan" id="perf-inc">
+                            <label for="perf-inc" class="option-label">Incremental Scan</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="performance.skip_unchanged_files" id="perf-skip">
+                            <label for="perf-skip" class="option-label">Skip Unchanged Files</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="performance.lazy_loading" id="perf-lazy">
+                            <label for="perf-lazy" class="option-label">Lazy Loading</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Scan Optimization Mode</label>
+                            <select name="performance.scan_mode">
+                                <option value="full">Full Scan Mode</option>
+                                <option value="fast">Fast Scan Mode</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 8: Advanced -->
+                <div id="page-advanced" class="page-card">
+                    <div class="section-title">Advanced Configuration</div>
+                    <div class="card">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="advanced.enable_debug_logs" id="adv-debug">
+                            <label for="adv-debug" class="option-label">Enable Debug Logs</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="advanced.verbose_logging" id="adv-verbose">
+                            <label for="adv-verbose" class="option-label">Verbose Logging</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="advanced.save_scan_logs" id="adv-save-logs">
+                            <label for="adv-save-logs" class="option-label">Save Scan Logs</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="advanced.auto_cleanup_old_reports" id="adv-cleanup">
+                            <label for="adv-cleanup" class="option-label">Auto Cleanup Old Reports</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Cleanup After (Days)</label>
+                            <input type="number" name="advanced.cleanup_after_days" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Report History</label>
+                            <input type="number" name="advanced.max_report_history" min="1" required>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="advanced.validate_config_before_scan" id="adv-validate">
+                            <label for="adv-validate" class="option-label">Validate Config Before Scan</label>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn btn-critical" onclick="restoreDefaults()">Restore Defaults</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 9: About -->
+                <div id="page-about" class="page-card">
+                    <div class="section-title">About Archon One Settings</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <label class="option-label">Archon One Version</label>
+                            <div class="option-desc">v0.1.0</div>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Python Version</label>
+                            <div class="option-desc">3.14.6</div>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Configuration Save Path</label>
+                            <div id="config-save-path" class="option-desc">Project Root / archon-config.json</div>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Last Saved</label>
+                            <div id="config-last-saved" class="option-desc">Unknown</div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Footer StatusBar -->
+        <div class="footer">
+            <div class="status-indicator">
+                <div id="status-dot" class="status-dot"></div>
+                <span id="status-text">Configuration Saved</span>
+            </div>
+            <div id="validation-text" style="color: var(--text-color); opacity: 0.6;">All settings are valid</div>
+        </div>
+    </div>
+
+    <script>
+        let isDirty = false;
+        let originalConfig = {};
+
+        // Load configuration on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/config')
+                .then(res => res.json())
+                .then(data => {
+                    originalConfig = data;
+                    populateForm(data);
+                    document.getElementById('config-last-saved').innerText = new Date().toLocaleString();
+                    validateForm();
+                });
+                
+            // Search implementation
+            document.getElementById('search-box').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                const optionGroups = document.querySelectorAll('.option-group, .checkbox-group');
+                optionGroups.forEach(grp => {
+                    const text = grp.textContent.toLowerCase();
+                    if (text.includes(query)) {
+                        grp.style.display = 'flex';
+                    } else {
+                        grp.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.page-card').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function populateForm(data) {
+            const form = document.getElementById('config-form');
+            for (const section in data) {
+                for (const key in data[section]) {
+                    const name = `${section}.${key}`;
+                    const val = data[section][key];
+                    const input = form.elements[name];
+                    if (input) {
+                        if (input.type === 'checkbox') {
+                            input.checked = !!val;
+                        } else if (Array.isArray(val)) {
+                            input.value = val.join(', ');
+                        } else {
+                            input.value = val;
+                        }
+                    }
+                }
+            }
+            isDirty = false;
+            updateStatus();
+        }
+
+        function formToJSON() {
+            const form = document.getElementById('config-form');
+            const data = {};
+            
+            // Loop inputs and build nested structure
+            for (let i = 0; i < form.elements.length; i++) {
+                const input = form.elements[i];
+                if (!input.name) continue;
+                
+                const parts = input.name.split('.');
+                const section = parts[0];
+                const key = parts[1];
+                
+                if (!data[section]) data[section] = {};
+                
+                if (input.type === 'checkbox') {
+                    data[section][key] = input.checked;
+                } else if (input.type === 'number') {
+                    data[section][key] = Number(input.value);
+                } else if (input.name.includes('ignore_directories') || input.name.includes('ignore_files') || input.name.includes('ignore_extensions')) {
+                    data[section][key] = input.value.split(',').map(x => x.trim()).filter(x => x.length > 0);
+                } else {
+                    data[section][key] = input.value;
+                }
+            }
+            return data;
+        }
+
+        function markDirty() {
+            isDirty = true;
+            updateStatus();
+            validateForm();
+        }
+
+        function validateForm() {
+            const form = document.getElementById('config-form');
+            const valText = document.getElementById('validation-text');
+            const statusDot = document.getElementById('status-dot');
+            
+            let errors = [];
+            
+            // Basic threshold validation
+            const numInputs = form.querySelectorAll('input[type="number"]');
+            numInputs.forEach(input => {
+                const val = Number(input.value);
+                if (input.required && (isNaN(val) || val < 0)) {
+                    errors.push(`${input.name} must be a positive number`);
+                }
+            });
+            
+            if (errors.length > 0) {
+                valText.innerText = `Invalid: ${errors[0]}`;
+                valText.style.color = 'var(--critical-color)';
+                statusDot.className = 'status-dot error';
+                return false;
+            } else {
+                valText.innerText = "All settings are valid";
+                valText.style.color = 'var(--text-color)';
+                updateStatus();
+                return true;
+            }
+        }
+
+        function updateStatus() {
+            const statusText = document.getElementById('status-text');
+            const statusDot = document.getElementById('status-dot');
+            if (isDirty) {
+                statusText.innerText = "Unsaved Changes";
+                statusDot.className = "status-dot dirty";
+            } else {
+                statusText.innerText = "Configuration Saved";
+                statusDot.className = "status-dot";
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.backgroundColor = type === 'error' ? 'var(--critical-color)' : 'var(--success-color)';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function saveConfig() {
+            if (!validateForm()) {
+                showToast("Cannot save: Form has errors", "error");
+                return;
+            }
+            
+            const data = formToJSON();
+            fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    isDirty = false;
+                    originalConfig = data;
+                    updateStatus();
+                    document.getElementById('config-last-saved').innerText = new Date().toLocaleString();
+                    showToast("Configuration saved successfully!");
+                } else {
+                    showToast("Failed to save configuration", "error");
+                }
+            });
+        }
+
+        function resetPage() {
+            populateForm(originalConfig);
+            showToast("Page settings reset to last saved state");
+        }
+
+        function restoreDefaults() {
+            if (confirm("Are you sure you want to restore default config values?")) {
+                fetch('/api/config/reset', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        originalConfig = data;
+                        populateForm(data);
+                        showToast("Restored factory defaults successfully!");
+                    });
+            }
+        }
+
+        function triggerImport() {
+            document.getElementById('import-file').click();
+        }
+
+        function importConfig(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    populateForm(data);
+                    isDirty = true;
+                    updateStatus();
+                    showToast("Imported configuration successfully! Remember to save changes.");
+                } catch (err) {
+                    showToast("Invalid JSON file", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportConfig() {
+            const data = formToJSON();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'archon-config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function shutdownServer() {
+            if (confirm("Shutdown the settings server?")) {
+                fetch('/api/shutdown', { method: 'POST' })
+                    .then(() => {
+                        showToast("Settings server shut down successfully.");
+                        setTimeout(() => {
+                            window.close();
+                        }, 1000);
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{
+  "general": {
+    "project_name": "Archon One Project",
+    "output_folder": "archon-one",
+    "create_timestamp_folder": true,
+    "default_scan_location": ".",
+    "auto_load_previous_config": true,
+    "auto_save_settings": true,
+    "auto_open_report_folder": false,
+    "enable_scan_summary": true,
+    "max_scan_history": 10,
+    "language_detection": "auto"
+  },
+  "modules": {
+    "code_metrics": true,
+    "security": true,
+    "code_analysis": true,
+    "contributor_analysis": true,
+    "repository_intelligence": true,
+    "run_selected_only": false
+  },
+  "output": {
+    "txt": true,
+    "json": true,
+    "md": true,
+    "output_tables": "ASCII",
+    "sort_reports_by": "Severity",
+    "max_rows_per_report": 100,
+    "show_empty_reports": false,
+    "compress_reports": false,
+    "overwrite_existing_reports": true
+  },
+  "ignore_rules": {
+    "ignore_directories": [
+      "node_modules",
+      ".git",
+      "venv",
+      "build",
+      "dist",
+      "coverage"
+    ],
+    "ignore_files": [
+      "*.min.js",
+      "*.log",
+      "*.lock"
+    ],
+    "ignore_extensions": [
+      "png",
+      "jpg",
+      "gif",
+      "pdf",
+      "zip"
+    ],
+    "ignore_hidden_files": true,
+    "ignore_hidden_directories": true,
+    "ignore_binary_files": true,
+    "ignore_generated_files": true,
+    "ignore_vendor_libraries": true,
+    "ignore_test_files": false,
+    "ignore_documentation": false,
+    "ignore_empty_files": true,
+    "ignore_large_files": true,
+    "max_file_size": 10485760,
+    "max_directory_depth": 20
+  },
+  "thresholds": {
+    "max_function_length": 100,
+    "max_class_length": 500,
+    "max_file_length": 1000,
+    "max_parameters": 5,
+    "max_cyclomatic_complexity": 15,
+    "max_cognitive_complexity": 15,
+    "max_nesting_depth": 5,
+    "max_line_length": 120,
+    "max_duplicate_percentage": 5.0,
+    "max_duplicate_lines": 10,
+    "min_comment_density": 10.0,
+    "min_maintainability_score": 50.0,
+    "max_technical_debt_score": 50.0,
+    "max_dependency_depth": 5,
+    "max_import_count": 20,
+    "large_file_warning": 2097152,
+    "critical_file_size": 5242880,
+    "max_folder_size": 104857600
+  },
+  "security": {
+    "enable_secret_detection": true,
+    "enable_config_scan": true,
+    "enable_dependency_scan": true,
+    "enable_credential_scan": true,
+    "enable_dangerous_function_detection": true,
+    "enable_hardcoded_ip_detection": true,
+    "enable_base64_detection": true,
+    "enable_weak_crypto_detection": true,
+    "enable_regex_scan": true,
+    "enable_environment_scan": true,
+    "minimum_severity": "Low",
+    "max_secret_length": 128,
+    "ignore_example_secrets": true
+  },
+  "performance": {
+    "max_worker_threads": 4,
+    "max_memory_usage": 1024,
+    "max_files": 10000,
+    "max_scan_time": 600,
+    "enable_cache": true,
+    "cache_size": 1000,
+    "incremental_scan": false,
+    "skip_unchanged_files": false,
+    "lazy_loading": false,
+    "scan_mode": "full"
+  },
+  "advanced": {
+    "enable_debug_logs": false,
+    "verbose_logging": false,
+    "save_scan_logs": true,
+    "auto_cleanup_old_reports": false,
+    "cleanup_after_days": 30,
+    "max_report_history": 50,
+    "validate_config_before_scan": true
+  }
+}

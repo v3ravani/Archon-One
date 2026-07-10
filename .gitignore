@@ -1,0 +1,25 @@
+# Python build & distribution
+dist/
+build/
+*.egg-info/
+src/*.egg-info/
+__pycache__/
+*.pyc
+
+# Local environments
+.venv/
+env/
+venv/
+ENV/
+
+# Development cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local scan reports
+archon-one/
+test_reports/
+test_settings_workspace/
+test_custom_output_dir/
+test_contributor_reports/

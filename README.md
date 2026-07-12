@@ -469,6 +469,27 @@ Aggregates quality indices to compute health score, overall grade, and prioritiz
 ### Module 06: Knowledge Graph
 Converts the repository structure into a machine-readable graph of folders, files, classes, functions, and database elements, mapping their relationships.
 - **Workflow**: Performs static code analysis and parsing of import, call, class, API, and DB usage patterns.
+
+```mermaid
+graph TD
+    subgraph Legend [Knowledge Graph Node Types & Linkages]
+        Repo[Repository Node] -->|contains| Folder[Folder Node]
+        Folder -->|contains| File[File Node]
+        File -->|defines| Class[Class Node]
+        File -->|defines| Func[Function Node]
+        File -->|imports| OtherFile[Other File Node]
+        
+        Class -->|inherits| BaseClass[Base Class Node]
+        Class -->|defines| Method[Method Node]
+        
+        Func -->|calls| OtherFunc[Other Function Node]
+        Method -->|calls| Func
+        
+        Method -->|reads/writes| DB[Database Table/Model Node]
+        Func -->|handlers| API[API Endpoint Node]
+    end
+```
+
 - **Data Model Schema**:
   - **Nodes**: Discovered components represented as unique JSON vertices. Every node contains:
     - `id` (string): Unique identifier (e.g., `File_src_archon_cli_py` or `Class_Scanner`).
@@ -486,6 +507,20 @@ Converts the repository structure into a machine-readable graph of folders, file
     - `target` (string): Reference ID of the ending node.
     - `type` (string): Semantic link type (e.g., `imports`, `calls`, `inherits`).
     - `attributes` (dict): Contextual parameters (e.g., import alias, call line number).
+
+- **Knowledge Graph Components Reference Table**:
+
+| Node Type | Properties / Attributes | Description | Relationships Map (Edges) |
+|---|---|---|---|
+| **Repository** | `name`, `root_path`, `total_files`, `total_directories` | Represents the top-level repository container. | `contains` (Folders, Files) |
+| **Folder** | `name`, `relative_path`, `depth` | Represents directories inside the project tree. | `contains` (Sub-folders, Files) |
+| **File** | `name`, `relative_path`, `loc`, `extension`, `language` | Represents a single code or config file. | `imports` (Files), `defines` (Classes, Functions) |
+| **Class** | `name`, `base_classes`, `methods_count`, `properties_count` | Object-oriented classes, interfaces, and structures. | `inherits` (Classes), `defines` (Methods) |
+| **Function** | `name`, `parameters`, `is_async`, `lines_count` | Standalone functions or block routines. | `calls` (Functions), `handlers` (APIs) |
+| **API Endpoint** | `http_method`, `path_route`, `handler_function` | Registered HTTP endpoints and routes. | `belongs_to` (Files) |
+| **Database** | `table_name`, `columns`, `operations` | SQL/NoSQL schemas, tables, and CRUD operations. | `reads`/`writes` (Database Table) |
+| **Configuration** | `name`, `parameters_dict`, `dialect` | Parsed environment files and configs. | `configures` (Repository, Files) |
+
 - **Deliverables**:
   - `nodes.json` / `edges.json`: Raw graph arrays suitable for visualization frameworks (d3.js, cytoscape) or network analysis libraries (NetworkX).
   - `graph_statistics.json`: Graph metrics including density, maximum/average degrees, count breakdown, and depth.
@@ -496,28 +531,55 @@ Converts the repository structure into a machine-readable graph of folders, file
   - `knowledge_graph.include_dependencies` (default `true`): Include package/module import chains and circular dependencies.
   - `knowledge_graph.include_apis` (default `true`): Include API handlers and routing entry points.
   - `knowledge_graph.include_database` (default `true`): Include database tables, schema models, and access operations.
-  - `knowledge_graph.include_configurations` (default `true`): Include environment variables, feature flags, and configuration parameters.
+  - `knowledge_graph.include_configurations` (default `true`): Include environment variables, config files, and feature flags.
   - `knowledge_graph.max_depth` (default `10`): Capping relationship traversal depth (BFS distance) and directory parsing.
   - `knowledge_graph.min_node_connections` (default `1`): Pruning isolated nodes that do not meet the minimum connection degree threshold.
 
 ### Module 07: Architecture Diagrams
 Statically traverses the repository to generate structured codebase architecture visual mappings in standard formats.
 - **Workflow**: Performs file parsing, dependency graph resolution, and call graph analysis to generate visual diagrams.
-- **14 Unified Diagram Suites**:
-  1. `architecture` (Overall Repository Architecture): Maps high-level entry points (CLI/main), core subsystems (parsers/scanners), and helper module boundaries to illustrate global package segregation.
-  2. `component_diagram` (Component Layout): Visualizes layout boundaries separating controllers/routing layers, service handler business logic, db models, configuration inputs, and utility frameworks.
-  3. `module_diagram` (Module Communications): Maps logical module boundaries and their inter-dependencies, highlighting communication flow direction.
-  4. `package_diagram` (Package Structure): Illustrates nested directory sub-packages and filesystem package links.
-  5. `dependency_diagram` (Dependency Map): Detailed imports map flagging circular imports in highlighted red routes, and highly utilized libraries in bold green nodes.
-  6. `folder_structure` (Directory Tree): Hierarchical repository directory structure mapping folder layouts.
-  7. `service_flow` (Sequence Flow): Sequential operational sequence tracing pipeline setup from startup inputs down to generated deliverables.
-  8. `call_graph` (Function Invocation): Maps invocation directions between internal package functions to find hotspots.
-  9. `data_flow` (Data Stream Pipeline): Traces the path of input payloads, processing models, static databases, and HTML reports generation.
-  10. `class_relationships` (Class Diagram): Renders class inheritance lineages, method definitions, and member variables.
-  11. `sequence_diagram` (Execution Sequence): Chronological timeline tracing scanner calls, parser execution, and reporter output compilation.
-  12. `state_diagram` (Scanning State Lifecycle): Traces scan states: `Uninitialized` -> `Configured` -> `Scanning` -> `Analyzing` -> `Compiling` -> `Completed`.
-  13. `entity_relationship` (Structural Entity Relationships): Maps connections between codebase components: `Repository` contains `Files` contains `Classes` contains `Functions`.
-  14. `security_diagram` (Data Trust Boundaries): Maps data flow crossing trust boundaries, tagging potential vulnerability check zones.
+
+```mermaid
+graph LR
+    subgraph Scan Engine [Pipeline Analysis Inputs]
+        Files[Source Files] --> Scanner[AST Parser]
+        Scanner --> Metrics[Metrics Engine]
+        Scanner --> Imports[Import Analyzer]
+        Scanner --> Symbols[Symbol Table]
+    end
+
+    subgraph Diagrams Compiler [Diagrams Reporter]
+        Metrics & Imports & Symbols --> Mapper{Diagram Mapper}
+        Mapper -->|generate| MMD[Mermaid Source .mmd]
+        Mapper -->|generate| PUML[PlantUML Source .puml]
+        Mapper -->|generate| JSON[metadata.json]
+    end
+
+    subgraph Output Viewers [Interactive Dashboard]
+        MMD -->|renders| SVG[Mermaid dynamic SVG]
+        PUML -->|raw text| PUMLTab[PlantUML Editor code]
+    end
+```
+
+- **14 Unified Diagram Suites Reference Table**:
+
+| Key Name / File ID | Diagram Category | Focus & Structural Coverage | Parsed AST Sources & Target Entities |
+|---|---|---|---|
+| `architecture` | Structural Map | Overall codebase subsystem architecture grouping. | High-level packages, entry files, major scripts. |
+| `component_diagram` | Component Map | Segregation of logic layers (Controllers, Services, DB). | Entire codebase folders and files. |
+| `module_diagram` | Communications | Inter-module boundaries and imports interactions. | Core packages and feature packages imports. |
+| `package_diagram` | Package Tree | Filesystem package hierarchies and subdirectories. | Directory structures and `__init__.py`/module links. |
+| `dependency_diagram` | Dependency Map | Imports cycle analyzer, circular paths (red), shared nodes (green). | All script files imports/require statements. |
+| `folder_structure` | Filesystem Tree | Visual folder tree mirroring code directory maps. | Directories structure. |
+| `service_flow` | Behavioral Seq | Sequential operations workflow from startup to finish. | Run execution path. |
+| `call_graph` | Execution Map | Function callers/callees interactions and depth. | Code functions list and contents. |
+| `data_flow` | Data Pipeline | Data stream movement from input parameters to reports. | Core scanning pipeline. |
+| `class_relationships` | Object Hierarchy | Classes inheritance, member variables, and interface mappings. | Discovered AST classes and parent definitions. |
+| `sequence_diagram` | Sequence Timeline | Sequence of CLI calls, scans, parsers, and outputs. | Execution timelines. |
+| `state_diagram` | Lifecycle State | Scanning state transition mappings. | Run lifecycle states. |
+| `entity_relationship` | ER Schema | Logical mappings between codebase models and schemas. | Found entities. |
+| `security_diagram` | Security Flow | Cross trust boundaries vulnerability check paths. | Sensitive endpoints, files and functions. |
+
 - **Offline HTML Viewer Features**:
   - Dynamically renders Mermaid vector SVGs in real-time.
   - Supports zoom and pan controls.

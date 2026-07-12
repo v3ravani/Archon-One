@@ -1,6 +1,6 @@
 # Archon One - Enterprise Code Analysis, Security Auditing & Repository Intelligence Platform
 
-Archon One is a comprehensive repository intelligence platform that analyzes software projects and generates detailed reports covering code metrics, security, maintainability, contributors, repository health, and a machine-readable Knowledge Graph. The generated graph models relationships between files, classes, functions, dependencies, APIs, configurations, and database objects, enabling faster repository navigation and improving how developers and AI systems understand large codebases.
+Archon One is a comprehensive repository intelligence platform that analyzes software projects and generates detailed reports covering code metrics, security, maintainability, contributors, repository health, structured architecture diagrams, and a machine-readable Knowledge Graph. The generated diagrams and graph model relationships between files, classes, functions, dependencies, APIs, configurations, and database objects, enabling faster repository navigation and improving how developers and AI systems understand large codebases.
 
 This manual documents the architecture, configuration parameters, modules, commands, metrics formulas, and workflows of Archon One.
 

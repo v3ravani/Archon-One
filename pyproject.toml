@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "archon-one"
-version = "0.2.0"
-description = "Archon One is a comprehensive repository intelligence platform that analyzes software projects and generates detailed reports covering code metrics, security, maintainability, contributors, repository health, structured architecture diagrams, and a machine-readable Knowledge Graph. The generated diagrams and graph model relationships between files, classes, functions, dependencies, APIs, configurations, and database objects, enabling faster repository navigation and improving how developers and AI systems understand large codebases."
+version = "0.4.1"
+description = "A comprehensive repository intelligence platform that transforms software projects into actionable insights, interactive architecture diagrams, and a searchable Knowledge Graph for faster understanding, navigation, and analysis."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

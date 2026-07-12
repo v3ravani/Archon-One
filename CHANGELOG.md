@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 - Customizable settings under settings dashboard for Knowledge Graph generation.
 - Dynamic graph filtering and BFS depth limits based on settings.
 - Integrated output directory auto-ignoring in code scanner.
+- Standalone Module 07: Architecture Diagrams (14 Mermaid and 14 PlantUML diagrams).
+- Dedicated `archon diagrams` CLI command with custom output directory option.
+- Interactive standalone HTML Diagram Viewer with pan, zoom, search, toggling, fullscreen, and SVG download capability.
+- Customizable diagrams output configurations in dashboard settings and `archon-config.json`.
 ### Removed
 - Standalone HTML explorer from deliverables list.
 

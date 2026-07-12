@@ -2,8 +2,9 @@ import os
 import json
 import time
 import math
+import re
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from tabulate import tabulate
 
 class RepositoryIntelligenceReporter:
@@ -44,7 +45,7 @@ class RepositoryIntelligenceReporter:
         
         # Generate interactive HTML report
         from archon.core.html_generator import compile_and_write_html_report
-        nav = {"prev": "../04_Contributor_Analysis/report.html"}
+        nav = {"prev": "../04_Contributor_Analysis/report.html", "next": "../07_Diagrams/report.html"}
         compile_and_write_html_report(self.output_root, self.results, "Repository Intelligence (Module 05)", nav)
         
     def _get_footer(self) -> str:
@@ -512,3 +513,5 @@ class RepositoryIntelligenceReporter:
             "findings_count": len(self.findings)
         }
         self._write_files("10_scan_metadata", txt, json_data)
+
+

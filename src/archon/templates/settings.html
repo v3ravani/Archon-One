@@ -311,6 +311,7 @@
             <li class="nav-link" onclick="switchPage('page-thresholds', this)">Thresholds</li>
             <li class="nav-link" onclick="switchPage('page-security', this)">Security</li>
             <li class="nav-link" onclick="switchPage('page-knowledge-graph', this)">Knowledge Graph</li>
+            <li class="nav-link" onclick="switchPage('page-diagrams', this)">Architecture Diagrams</li>
             <li class="nav-link" onclick="switchPage('page-performance', this)">Performance</li>
             <li class="nav-link" onclick="switchPage('page-advanced', this)">Advanced</li>
             <li class="nav-link" onclick="switchPage('page-about', this)">About</li>
@@ -417,6 +418,10 @@
                         <div class="checkbox-group">
                             <input type="checkbox" name="modules.knowledge_graph" id="mod-graph">
                             <label for="mod-graph" class="option-label">Knowledge Graph (Module 06)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.diagrams" id="mod-diagrams">
+                            <label for="mod-diagrams" class="option-label">Architecture Diagrams (Module 07)</label>
                         </div>
                         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
                         <div class="checkbox-group">
@@ -707,6 +712,26 @@
                         <div class="option-group">
                             <label class="option-label">Minimum Connections for Node Inclusion</label>
                             <input type="number" name="knowledge_graph.min_node_connections" min="0" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Diagrams -->
+                <div id="page-diagrams" class="page-card">
+                    <div class="section-title">Architecture Diagrams Customization</div>
+                    <div class="card">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="diagrams.include_mmd" id="diag-include-mmd">
+                            <label for="diag-include-mmd" class="option-label">Generate Mermaid Source (.mmd)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="diagrams.include_puml" id="diag-include-puml">
+                            <label for="diag-include-puml" class="option-label">Generate PlantUML Source (.puml)</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Scanned Files in Dependency Diagrams</label>
+                            <input type="number" name="diagrams.max_nodes" min="5" max="500" required>
+                            <div class="option-desc">Limits node counts for rendering performance.</div>
                         </div>
                     </div>
                 </div>

@@ -27,6 +27,7 @@ DEFAULT_CONFIG = {
     "contributor_analysis": True,
     "repository_intelligence": True,
     "knowledge_graph": True,
+    "diagrams": True,
     "run_selected_only": False
   },
   "output": {
@@ -100,6 +101,11 @@ DEFAULT_CONFIG = {
     "include_configurations": True,
     "max_depth": 10,
     "min_node_connections": 1
+  },
+  "diagrams": {
+    "include_mmd": True,
+    "include_puml": True,
+    "max_nodes": 50
   },
   "performance": {
     "max_worker_threads": 4,

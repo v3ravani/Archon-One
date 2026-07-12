@@ -30,6 +30,7 @@ This manual documents the architecture, configuration parameters, modules, comma
     - [Module 04: Contributor Analysis](#module-04-contributor-analysis)
     - [Module 05: Repository Intelligence](#module-05-repository-intelligence)
     - [Module 06: Knowledge Graph](#module-06-knowledge-graph)
+    - [Module 07: Architecture Diagrams](#module-07-architecture-diagrams)
 18. [Metrics Reference](#18-metrics-reference)
 19. [Module-by-Module Output & Reports Breakdown](#19-module-by-module-output--reports-breakdown)
 20. [Security Rules Reference](#20-security-rules-reference)
@@ -468,9 +469,27 @@ Aggregates quality indices to compute health score, overall grade, and prioritiz
 ### Module 06: Knowledge Graph
 Converts the repository structure into a machine-readable graph of folders, files, classes, functions, and database elements, mapping their relationships.
 - **Workflow**: Performs static code analysis and parsing of import, call, class, API, and DB usage patterns.
-- **Node Types**: Repository, Folders, Packages, Modules, Files, Classes, Interfaces, Enums, Structs, Functions, Methods, Constructors, Variables, Constants, Properties, Imports, Exports, API Endpoints, Database Models, Database Tables, Configuration Files, Environment Variables, Dependencies, Exceptions, Decorators, Namespaces, Test Files, Resources.
-- **Relationship Types**: contains, imports, exports, calls, called_by, inherits, implements, creates, instantiates, reads, writes, updates, deletes, depends_on, referenced_by, belongs_to, located_in, tests, tested_by, decorates, throws, catches, uses, defines, extends, communicates_with, configured_by, registered_in, connected_to, linked_with.
-- **Reports**: graph_summary.txt, graph_summary.json, nodes.json, edges.json, symbols.json, imports.json, packages.json, dependencies.json, apis.json, database.json, configurations.json, graph_statistics.json, repository_map.md.
+- **Data Model Schema**:
+  - **Nodes**: Discovered components represented as unique JSON vertices. Every node contains:
+    - `id` (string): Unique identifier (e.g., `File_src_archon_cli_py` or `Class_Scanner`).
+    - `type` (string): Category matching one of the supported node types.
+    - `label` (string): Human-readable display label.
+    - `attributes` (dict): Extensible metadata:
+      - *Files*: `loc` (lines of code), `language`, `extension`, `size_bytes`.
+      - *Classes*: `methods_count`, `properties_count`, `base_classes`, `is_abstract`.
+      - *Functions*: `parameters` (list of names), `is_async`, `lines_count`.
+      - *APIs*: `http_method` (GET/POST/etc.), `path_route`, `handler_function`.
+      - *Database*: `table_name`, `columns` (keys and types), `operations_performed`.
+  - **Edges**: Directed relationships forming standard JSON connections. Each edge contains:
+    - `id` (string): Composite identifier `[Source_ID] -> [Relation] -> [Target_ID]`.
+    - `source` (string): Reference ID of the starting node.
+    - `target` (string): Reference ID of the ending node.
+    - `type` (string): Semantic link type (e.g., `imports`, `calls`, `inherits`).
+    - `attributes` (dict): Contextual parameters (e.g., import alias, call line number).
+- **Deliverables**:
+  - `nodes.json` / `edges.json`: Raw graph arrays suitable for visualization frameworks (d3.js, cytoscape) or network analysis libraries (NetworkX).
+  - `graph_statistics.json`: Graph metrics including density, maximum/average degrees, count breakdown, and depth.
+  - `repository_map.md`: Clickable Markdown overview representing file directory nesting levels and key class linkages.
 - **Customization Settings**:
   - `knowledge_graph.include_classes` (default `true`): Include classes, interfaces, enums, and structs.
   - `knowledge_graph.include_functions` (default `true`): Include standalone functions, object methods, and constructors.
@@ -480,6 +499,35 @@ Converts the repository structure into a machine-readable graph of folders, file
   - `knowledge_graph.include_configurations` (default `true`): Include environment variables, feature flags, and configuration parameters.
   - `knowledge_graph.max_depth` (default `10`): Capping relationship traversal depth (BFS distance) and directory parsing.
   - `knowledge_graph.min_node_connections` (default `1`): Pruning isolated nodes that do not meet the minimum connection degree threshold.
+
+### Module 07: Architecture Diagrams
+Statically traverses the repository to generate structured codebase architecture visual mappings in standard formats.
+- **Workflow**: Performs file parsing, dependency graph resolution, and call graph analysis to generate visual diagrams.
+- **14 Unified Diagram Suites**:
+  1. `architecture` (Overall Repository Architecture): Maps high-level entry points (CLI/main), core subsystems (parsers/scanners), and helper module boundaries to illustrate global package segregation.
+  2. `component_diagram` (Component Layout): Visualizes layout boundaries separating controllers/routing layers, service handler business logic, db models, configuration inputs, and utility frameworks.
+  3. `module_diagram` (Module Communications): Maps logical module boundaries and their inter-dependencies, highlighting communication flow direction.
+  4. `package_diagram` (Package Structure): Illustrates nested directory sub-packages and filesystem package links.
+  5. `dependency_diagram` (Dependency Map): Detailed imports map flagging circular imports in highlighted red routes, and highly utilized libraries in bold green nodes.
+  6. `folder_structure` (Directory Tree): Hierarchical repository directory structure mapping folder layouts.
+  7. `service_flow` (Sequence Flow): Sequential operational sequence tracing pipeline setup from startup inputs down to generated deliverables.
+  8. `call_graph` (Function Invocation): Maps invocation directions between internal package functions to find hotspots.
+  9. `data_flow` (Data Stream Pipeline): Traces the path of input payloads, processing models, static databases, and HTML reports generation.
+  10. `class_relationships` (Class Diagram): Renders class inheritance lineages, method definitions, and member variables.
+  11. `sequence_diagram` (Execution Sequence): Chronological timeline tracing scanner calls, parser execution, and reporter output compilation.
+  12. `state_diagram` (Scanning State Lifecycle): Traces scan states: `Uninitialized` -> `Configured` -> `Scanning` -> `Analyzing` -> `Compiling` -> `Completed`.
+  13. `entity_relationship` (Structural Entity Relationships): Maps connections between codebase components: `Repository` contains `Files` contains `Classes` contains `Functions`.
+  14. `security_diagram` (Data Trust Boundaries): Maps data flow crossing trust boundaries, tagging potential vulnerability check zones.
+- **Offline HTML Viewer Features**:
+  - Dynamically renders Mermaid vector SVGs in real-time.
+  - Supports zoom and pan controls.
+  - Real-time text search highlighting matching nodes.
+  - Formats raw source text tabs for PlantUML copy-pasting.
+  - Instant SVG download buttons for documentation integration.
+- **Customization Settings**:
+  - `diagrams.include_mmd` (default `true`): Write `.mmd` Mermaid source files.
+  - `diagrams.include_puml` (default `true`): Write `.puml` PlantUML source files.
+  - `diagrams.max_nodes` (default `50`): Max nodes limit for dependency and package diagrams to preserve visual clarity.
 
 ---
 
@@ -1932,6 +1980,26 @@ JSON Keys:
 - `connected_components` (int)
 - `disconnected_components` (int)
 ```
+
+### Module 07: Architecture Diagrams (07_Diagrams)
+
+#### [DIAGRAMS] 07_Diagrams codebase architecture mapping
+**Description**: 14 Mermaid (`.mmd`) and 14 PlantUML (`.puml`) diagrams mapped during scan.
+- `architecture` - Overall Repository Architecture.
+- `component_diagram` - Component Diagram.
+- `module_diagram` - Module Diagram.
+- `package_diagram` - Package Diagram.
+- `dependency_diagram` - Dependency Diagram.
+- `folder_structure` - Folder Structure Diagram.
+- `service_flow` - Service Flow Diagram.
+- `call_graph` - Function Call Graph.
+- `data_flow` - Data Flow Diagram.
+- `class_relationships` - Class Relationship Diagram.
+- `sequence_diagram` - Execution Sequence Diagram.
+- `state_diagram` - Scanning Pipeline State Transition.
+- `entity_relationship` - Entity Relationship diagram.
+- `security_diagram` - Trust Boundary and Data Flow Security diagram.
+All diagrams are saved as standalone source files (`.mmd` and `.puml`) under the `07_Diagrams/` folder, and rendered dynamically via the interactive Diagrams tab inside the standalone HTML report.
 
 ---
 

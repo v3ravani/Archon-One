@@ -453,6 +453,202 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             border-radius: 4px;
             margin-top: 10px;
         }
+
+        /* Diagram Viewer Styles */
+        .diagram-container {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .diagram-workbench {
+            display: flex;
+            gap: 20px;
+            flex-grow: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .diagram-selector-panel {
+            width: 280px;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .diagram-search-box {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .diagram-search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .diagram-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .diagram-list-item {
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .diagram-list-item:hover {
+            background-color: var(--border-color);
+        }
+
+        .diagram-list-item.active {
+            background-color: var(--primary-btn);
+            color: var(--bg-color);
+        }
+
+        .diagram-viewer-panel {
+            flex-grow: 1;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .diagram-viewer-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .diagram-title-block h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .diagram-desc {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .diagram-toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .diagram-viewport-wrapper {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+            background-color: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .diagram-viewport {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .diagram-viewport:active {
+            cursor: grabbing;
+        }
+
+        .diagram-viewport svg {
+            user-select: none;
+            transform-origin: center center;
+            transition: transform 0.05s ease-out;
+        }
+
+        .code-viewer {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            display: none;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .btn-toggle-group {
+            display: flex;
+            border: 1px solid var(--primary-btn);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .btn-toggle {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            background-color: var(--bg-color);
+            color: var(--primary-btn);
+        }
+
+        .btn-toggle.active {
+            background-color: var(--primary-btn);
+            color: var(--bg-color);
+        }
+
+        .diagram-fullscreen {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 2000;
+            background-color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .diagram-fullscreen .diagram-viewport-wrapper {
+            height: calc(100vh - 120px);
+        }
     </style>
 </head>
 <body>
@@ -525,6 +721,50 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     </div>
                 </div>
             </div>
+
+            <!-- Diagram Workbench (Hidden by default) -->
+            <div class="diagram-container" id="diagram-viewer-container">
+                <div class="diagram-workbench">
+                    <!-- Left Sidebar Selectors -->
+                    <div class="diagram-selector-panel">
+                        <div class="diagram-search-box">
+                            <input type="text" id="diagram-search" class="diagram-search-input" placeholder="Search diagrams..." oninput="handleDiagramSearch(this.value)">
+                        </div>
+                        <ul class="diagram-list" id="diagram-list-items">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+
+                    <!-- Right Viewer Area -->
+                    <div class="diagram-viewer-panel" id="diagram-viewport-panel">
+                        <div class="diagram-viewer-header">
+                            <div class="diagram-title-block">
+                                <h3 id="active-diagram-title">Diagram Title</h3>
+                                <p class="diagram-desc" id="active-diagram-desc">Description of this diagram...</p>
+                            </div>
+                            <div class="diagram-toolbar">
+                                <div class="btn-toggle-group" style="margin-right: 15px;">
+                                    <button class="btn-toggle active" id="btn-view-mermaid" onclick="setDiagramViewMode('mermaid')">Mermaid Render</button>
+                                    <button class="btn-toggle" id="btn-view-plantuml" onclick="setDiagramViewMode('plantuml')">PlantUML Code</button>
+                                </div>
+                                <button class="btn btn-secondary" onclick="zoomDiagram(1.2)" id="btn-zoom-in" style="padding: 6px 10px;">＋</button>
+                                <button class="btn btn-secondary" onclick="zoomDiagram(0.8)" id="btn-zoom-out" style="padding: 6px 10px;">－</button>
+                                <button class="btn btn-secondary" onclick="resetZoom()" id="btn-zoom-reset">Reset</button>
+                                <button class="btn btn-secondary" onclick="downloadActiveDiagram('source')">Source</button>
+                                <button class="btn btn-secondary" onclick="downloadActiveDiagram('svg')" id="btn-download-svg">SVG</button>
+                                <button class="btn btn-secondary" onclick="toggleDiagramFullscreen()">Fullscreen</button>
+                            </div>
+                        </div>
+
+                        <div class="diagram-viewport-wrapper">
+                            <div class="diagram-viewport" id="mermaid-render-area" onmousedown="startDiagramDrag(event)" onmousemove="dragDiagram(event)" onmouseup="endDiagramDrag()" onmouseleave="endDiagramDrag()">
+                                <!-- Rendered Mermaid SVG here -->
+                            </div>
+                            <pre class="code-viewer" id="plantuml-code-area"><code id="plantuml-code-text">PlantUML source code...</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Side Details Panel Drawer -->
@@ -591,6 +831,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 navContainer.appendChild(li);
             });
 
+            if (reportData.diagrams && reportData.diagrams.length > 0) {
+                const li = document.createElement('li');
+                li.className = 'nav-link';
+                li.innerText = 'Architecture Diagrams';
+                li.onclick = () => switchToDiagramsView(li);
+                navContainer.appendChild(li);
+                
+                loadMermaidLibrary();
+                populateDiagramsList();
+                
+                if (reportData.sections.length === 0) {
+                    switchToDiagramsView(li);
+                }
+            }
+
             if (reportData.sections.length > 0) {
                 switchSection(reportData.sections[0].id);
             }
@@ -605,6 +860,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             sortDirection = 'asc';
             selectedRowIndex = -1;
             closeDrawer();
+
+            // Hide diagrams, restore table elements
+            document.getElementById('diagram-viewer-container').style.display = 'none';
+            document.getElementById('summary-cards').style.display = 'grid';
+            document.getElementById('table-container').style.display = 'flex';
+            document.getElementById('global-search').style.display = 'block';
 
             // Handle active class toggling
             if (navElement) {
@@ -839,6 +1100,224 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             a.click();
             URL.revokeObjectURL(url);
         }
+
+        // Diagrams JavaScript logic
+        let currentDiagramViewMode = 'mermaid';
+        let activeDiagramId = 'architecture';
+        let zoomScale = 1.0;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+
+        function loadMermaidLibrary() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+            script.onload = () => {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'default',
+                    flowchart: { useMaxWidth: false, htmlLabels: true },
+                    securityLevel: 'loose'
+                });
+                renderActiveDiagram();
+            };
+            script.onerror = () => {
+                console.warn("Failed to load Mermaid from CDN. Gracefully falling back to PlantUML source view.");
+                document.getElementById('btn-view-mermaid').style.display = 'none';
+                setDiagramViewMode('plantuml');
+            };
+            document.head.appendChild(script);
+        }
+
+        function populateDiagramsList() {
+            const listContainer = document.getElementById('diagram-list-items');
+            listContainer.innerHTML = "";
+            
+            const q = document.getElementById('diagram-search').value.toLowerCase();
+            const filtered = reportData.diagrams.filter(d => 
+                d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q)
+            );
+            
+            filtered.forEach(d => {
+                const li = document.createElement('li');
+                li.className = 'diagram-list-item' + (d.id === activeDiagramId ? ' active' : '');
+                li.innerText = d.title;
+                li.onclick = () => selectDiagram(d.id, li);
+                listContainer.appendChild(li);
+            });
+        }
+
+        function selectDiagram(id, liElement) {
+            activeDiagramId = id;
+            document.querySelectorAll('.diagram-list-item').forEach(l => l.classList.remove('active'));
+            liElement.classList.add('active');
+            
+            const diag = reportData.diagrams.find(d => d.id === id);
+            if (!diag) return;
+            
+            document.getElementById('active-diagram-title').innerText = diag.title;
+            document.getElementById('active-diagram-desc').innerText = diag.description;
+            
+            resetZoom();
+            renderActiveDiagram();
+        }
+
+        function setDiagramViewMode(mode) {
+            currentDiagramViewMode = mode;
+            document.getElementById('btn-view-mermaid').classList.toggle('active', mode === 'mermaid');
+            document.getElementById('btn-view-plantuml').classList.toggle('active', mode === 'plantuml');
+            
+            const renderArea = document.getElementById('mermaid-render-area');
+            const codeArea = document.getElementById('plantuml-code-area');
+            const zoomInBtn = document.getElementById('btn-zoom-in');
+            const zoomOutBtn = document.getElementById('btn-zoom-out');
+            const zoomResetBtn = document.getElementById('btn-zoom-reset');
+            const downloadSvgBtn = document.getElementById('btn-download-svg');
+            
+            if (mode === 'mermaid') {
+                renderArea.style.display = 'flex';
+                codeArea.style.display = 'none';
+                zoomInBtn.style.display = 'inline-flex';
+                zoomOutBtn.style.display = 'inline-flex';
+                zoomResetBtn.style.display = 'inline-flex';
+                downloadSvgBtn.style.display = 'inline-flex';
+            } else {
+                renderArea.style.display = 'none';
+                codeArea.style.display = 'block';
+                zoomInBtn.style.display = 'none';
+                zoomOutBtn.style.display = 'none';
+                zoomResetBtn.style.display = 'none';
+                downloadSvgBtn.style.display = 'none';
+            }
+            renderActiveDiagram();
+        }
+
+        function renderActiveDiagram() {
+            const diag = reportData.diagrams.find(d => d.id === activeDiagramId);
+            if (!diag) return;
+            
+            if (currentDiagramViewMode === 'mermaid') {
+                const renderArea = document.getElementById('mermaid-render-area');
+                renderArea.innerHTML = `<div style="color:#6c757d; font-size:0.9rem; padding:20px;">Rendering diagram...</div>`;
+                
+                if (typeof mermaid !== 'undefined') {
+                    try {
+                        const uniqueId = `mermaid_svg_${diag.id}_${Date.now()}`;
+                        mermaid.render(uniqueId, diag.mermaid).then(({ svg }) => {
+                            renderArea.innerHTML = svg;
+                            const svgElement = renderArea.querySelector('svg');
+                            if (svgElement) {
+                                svgElement.style.maxWidth = '100%';
+                                svgElement.style.height = 'auto';
+                                svgElement.style.transformOrigin = 'center center';
+                                applyTransform();
+                            }
+                        }).catch(err => {
+                            renderArea.innerHTML = `<div style="color:var(--critical-color); font-size:0.85rem; padding:20px; text-align:left; word-break:break-word;">
+                                <strong>Failed to render Mermaid diagram automatically:</strong><br>${err}
+                                <br><br>You can switch to the <em>PlantUML Code</em> view or download the Mermaid source code to render it in an external viewer.
+                            </div>`;
+                        });
+                    } catch (e) {
+                        renderArea.innerHTML = `<div style="color:var(--critical-color);">Render error: ${e}</div>`;
+                    }
+                } else {
+                    renderArea.innerHTML = `<div style="color:#6c757d; font-size:0.9rem; padding:20px;">Mermaid library loading...</div>`;
+                }
+            } else {
+                const codeText = document.getElementById('plantuml-code-text');
+                codeText.innerText = diag.plantuml;
+            }
+        }
+
+        function zoomDiagram(factor) {
+            zoomScale *= factor;
+            if (zoomScale < 0.2) zoomScale = 0.2;
+            if (zoomScale > 5.0) zoomScale = 5.0;
+            applyTransform();
+        }
+
+        function resetZoom() {
+            zoomScale = 1.0;
+            panX = 0;
+            panY = 0;
+            applyTransform();
+        }
+
+        function applyTransform() {
+            const svg = document.querySelector('#mermaid-render-area svg');
+            if (svg) {
+                svg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+            }
+        }
+
+        function startDiagramDrag(e) {
+            if (currentDiagramViewMode !== 'mermaid') return;
+            isDragging = true;
+            dragStartX = e.clientX - panX;
+            dragStartY = e.clientY - panY;
+            e.preventDefault();
+        }
+
+        function dragDiagram(e) {
+            if (!isDragging) return;
+            panX = e.clientX - dragStartX;
+            panY = e.clientY - dragStartY;
+            applyTransform();
+        }
+
+        function endDiagramDrag() {
+            isDragging = false;
+        }
+
+        function toggleDiagramFullscreen() {
+            const panel = document.getElementById('diagram-viewport-panel');
+            panel.classList.toggle('diagram-fullscreen');
+            resetZoom();
+        }
+
+        function downloadActiveDiagram(type) {
+            const diag = reportData.diagrams.find(d => d.id === activeDiagramId);
+            if (!diag) return;
+            
+            if (type === 'source') {
+                if (currentDiagramViewMode === 'mermaid') {
+                    downloadFile(diag.mermaid, `${diag.id}.mmd`, 'text/plain');
+                } else {
+                    downloadFile(diag.plantuml, `${diag.id}.puml`, 'text/plain');
+                }
+            } else if (type === 'svg') {
+                const svgWrapper = document.getElementById('mermaid-render-area');
+                const svg = svgWrapper.querySelector('svg');
+                if (svg) {
+                    const svgContent = svg.outerHTML;
+                    downloadFile(svgContent, `${diag.id}.svg`, 'image/svg+xml');
+                } else {
+                    alert("No rendered SVG available to download. Render in Mermaid mode first.");
+                }
+            }
+        }
+
+        function switchToDiagramsView(navElement) {
+            closeDrawer();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            navElement.classList.add('active');
+            
+            document.getElementById('summary-cards').style.display = 'none';
+            document.getElementById('table-container').style.display = 'none';
+            document.getElementById('global-search').style.display = 'none';
+            document.getElementById('diagram-viewer-container').style.display = 'flex';
+            
+            document.getElementById('section-title').innerText = "Architecture Diagrams";
+            
+            renderActiveDiagram();
+        }
+
+        function handleDiagramSearch(val) {
+            populateDiagramsList();
+        }
     </script>
 </body>
 </html>
@@ -931,7 +1410,8 @@ def generate_html_report(output_path: Path, data: Dict[str, Any]):
             "duration": data.get("duration", "0.00 seconds"),
             "navigation": data.get("navigation", {}),
             "summary_cards": data.get("summary_cards", []),
-            "sections": formatted_sections
+            "sections": formatted_sections,
+            "diagrams": data.get("diagrams", [])
         }
         
         # Serialize payload
@@ -956,9 +1436,18 @@ def compile_and_write_html_report(output_root: Path, results: Dict[str, Any], mo
     json_files = sorted(list(output_root.glob("*.json")), key=lambda x: x.name)
     sections = []
     summary_cards = []
+    diagrams = []
     
     # Process each JSON file
     for jf in json_files:
+        if jf.name == "11_architecture_diagrams.json":
+            try:
+                diagrams_data = json.loads(jf.read_text(encoding='utf-8'))
+                diagrams = diagrams_data.get("diagrams", [])
+            except Exception:
+                pass
+            continue
+            
         section = json_file_to_section(jf)
         if section:
             sections.append(section)
@@ -1008,7 +1497,8 @@ def compile_and_write_html_report(output_root: Path, results: Dict[str, Any], mo
         "duration": f"{results.get('scan_duration', 0.0):.4f} seconds",
         "navigation": nav,
         "summary_cards": summary_cards,
-        "sections": sections
+        "sections": sections,
+        "diagrams": diagrams
     }
     
     generate_html_report(output_root / "report.html", data)

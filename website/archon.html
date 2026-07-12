@@ -88,6 +88,7 @@
                 <a href="#mod4">Module 04: Contributor Stats</a>
                 <a href="#mod5">Module 05: Repo Intelligence</a>
                 <a href="#mod6">Module 06: Knowledge Graph</a>
+                <a href="#mod7">Module 07: Diagrams</a>
             </nav>
 
             <div class="sidebar-heading">Outputs & Guides</div>
@@ -703,6 +704,64 @@ pip install -e ".[dev]"</code></pre>
                                 <td>Integer</td>
                                 <td><code>1</code></td>
                                 <td>Skip/prune nodes with connection degree below this value.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Module 07 -->
+            <section id="mod7" class="doc-section">
+                <h2>Module 07: Diagrams</h2>
+                <p>Generates 14 detailed codebase architecture diagrams in Mermaid and PlantUML formats, providing full visibility into structures, dependency trees, trust boundaries, call cycles, and sequence maps.</p>
+                <div class="doc-sub-item">
+                    <h3>Available Diagrams</h3>
+                    <ul>
+                        <li><strong>Overall Repository Architecture</strong>: High-level entry points, core subsystems, and modular boundaries mapping.</li>
+                        <li><strong>Component Diagram</strong>: Shows Controllers, CLI layers, Service logic, Repositories, Databases, and configuration structures.</li>
+                        <li><strong>Module Diagram</strong>: Maps logical components and inter-module dependencies.</li>
+                        <li><strong>Package Diagram</strong>: Displays directory package layout and their relationships.</li>
+                        <li><strong>Dependency Diagram</strong>: Highlights internal import paths, external modules, circular imports (red), and shared helpers (green).</li>
+                        <li><strong>Folder Structure</strong>: Tree structure of the repository directories.</li>
+                        <li><strong>Service Flow Diagram</strong>: Scans runtime request flows and processing steps.</li>
+                        <li><strong>Function Call Graph</strong>: Maps calls between functions across the codebase.</li>
+                        <li><strong>Data Flow Diagram</strong>: Maps input data streams, processing systems, and report generation engines.</li>
+                        <li><strong>Class Relationship Diagram</strong>: Focuses on classes inheritance structure and property bindings.</li>
+                        <li><strong>Sequence Diagram</strong>: Shows scan CLI execution sequences.</li>
+                        <li><strong>State Diagram</strong>: Lifecycle state transitions of scanner processing steps.</li>
+                        <li><strong>Entity Relationship Diagram</strong>: Relates code model constructs.</li>
+                        <li><strong>Security Diagram</strong>: Displays scan execution security check trust boundaries.</li>
+                    </ul>
+                </div>
+                <div class="doc-sub-item">
+                    <h3>Settings parameters</h3>
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Option Key</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>include_mmd</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Write `.mmd` Mermaid source files.</td>
+                            </tr>
+                            <tr>
+                                <td><code>include_puml</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Write `.puml` PlantUML source files.</td>
+                            </tr>
+                            <tr>
+                                <td><code>max_nodes</code></td>
+                                <td>Integer</td>
+                                <td><code>50</code></td>
+                                <td>Limits scanned node count rendering inside dependency diagrams.</td>
                             </tr>
                         </tbody>
                     </table>

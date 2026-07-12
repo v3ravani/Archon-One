@@ -11,6 +11,8 @@ from archon.modules.security import SecurityReporter
 from archon.modules.code_analysis import CodeAnalysisReporter
 from archon.modules.contributor_analysis import ContributorAnalysisReporter
 from archon.modules.repository_intelligence import RepositoryIntelligenceReporter
+from archon.modules.knowledge_graph import KnowledgeGraphReporter
+
 
 def show_guide():
     typer.secho("================================================================================", fg=typer.colors.CYAN, bold=True)
@@ -23,13 +25,15 @@ def show_guide():
     typer.secho("  1. archon scan                     - Scan the current repository", fg=typer.colors.YELLOW)
     typer.secho("  2. archon scan <path>              - Scan a repository at a custom path", fg=typer.colors.YELLOW)
     typer.secho("  3. archon scan -o <out_path>       - Scan and save report files to a custom path", fg=typer.colors.YELLOW)
-    typer.secho("  4. archon git <repo_url>           - Clone a remote GitHub repo and scan it", fg=typer.colors.YELLOW)
-    typer.secho("  5. archon report                   - Compile latest scan results into a single index.html", fg=typer.colors.YELLOW)
-    typer.secho("  6. archon report <scan_path>       - Compile scan results at custom path to a single index.html", fg=typer.colors.YELLOW)
-    typer.secho("  7. archon config                   - Launch the offline settings dashboard page", fg=typer.colors.YELLOW)
-    typer.secho("  8. archon config reset             - Reset all settings back to defaults", fg=typer.colors.YELLOW)
-    typer.secho("  9. archon help                     - Show running guide instructions", fg=typer.colors.YELLOW)
-    typer.secho(" 10. archon about                    - Show developer and about details", fg=typer.colors.YELLOW)
+    typer.secho("  4. archon graph                    - Generate a Knowledge Graph for the current directory", fg=typer.colors.YELLOW)
+    typer.secho("  5. archon graph <path>             - Generate a Knowledge Graph for the specified repository", fg=typer.colors.YELLOW)
+    typer.secho("  6. archon git <repo_url>           - Clone a remote GitHub repo and scan it", fg=typer.colors.YELLOW)
+    typer.secho("  7. archon report                   - Compile latest scan results into a single index.html", fg=typer.colors.YELLOW)
+    typer.secho("  8. archon report <scan_path>       - Compile scan results at custom path to a single index.html", fg=typer.colors.YELLOW)
+    typer.secho("  9. archon config                   - Launch the offline settings dashboard page", fg=typer.colors.YELLOW)
+    typer.secho(" 10. archon config reset             - Reset all settings back to defaults", fg=typer.colors.YELLOW)
+    typer.secho(" 11. archon help                     - Show running guide instructions", fg=typer.colors.YELLOW)
+    typer.secho(" 12. archon about                    - Show developer and about details", fg=typer.colors.YELLOW)
     typer.secho("================================================================================", fg=typer.colors.CYAN)
 
 def help_callback(value: bool):
@@ -180,6 +184,12 @@ def scan(
         reporter_intelligence = RepositoryIntelligenceReporter(results, report_folder_intelligence)
         reporter_intelligence.generate_reports()
     
+    if config.get('modules', {}).get('knowledge_graph', True):
+        typer.secho("[*] Generating knowledge graph reports...", fg=typer.colors.CYAN)
+        report_folder_graph = report_root / "06_knowledge_graph"
+        reporter_graph = KnowledgeGraphReporter(results, report_folder_graph)
+        reporter_graph.generate_reports()
+    
     typer.secho("[*] Finalizing scan and saving reports...", fg=typer.colors.CYAN)
     
     # 5. Display scan summary
@@ -207,6 +217,86 @@ def scan(
     typer.secho("=" * 50, fg=typer.colors.YELLOW)
     # Show output save path
     typer.secho(f"\n[+] Reports saved to:\n   {report_root}", fg=typer.colors.GREEN, bold=True)
+    typer.secho("==================================================\n", fg=typer.colors.GREEN)
+
+@app.command(name="graph")
+def graph_command(
+    project_path: Optional[Path] = typer.Argument(
+        None, 
+        help="Path to repository to analyze (defaults to current directory)"
+    ),
+    output: Optional[Path] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Custom output directory to save reports"
+    )
+):
+    """
+    Generate a Knowledge Graph for the specified repository (or current directory).
+    """
+    # 1. Validate project directory
+    if project_path is None:
+        target_path = Path.cwd().resolve()
+    else:
+        target_path = project_path.resolve()
+        
+    if not target_path.exists():
+        typer.echo(f"Error: Path '{target_path}' does not exist.", err=True)
+        raise typer.Exit(code=1)
+        
+    if not target_path.is_dir():
+        typer.echo(f"Error: Path '{target_path}' is not a directory.", err=True)
+        raise typer.Exit(code=1)
+        
+    # Define progress callback
+    def progress_callback(current: int, total: int, filepath: Path):
+        percent = (current / total) * 100 if total > 0 else 0
+        bar_length = 20
+        filled_length = int(round(bar_length * current / float(total))) if total > 0 else 0
+        bar = '=' * filled_length + '-' * (bar_length - filled_length)
+        try:
+            rel_path = str(filepath.relative_to(target_path))
+        except Exception:
+            rel_path = filepath.name
+        if len(rel_path) > 35:
+            rel_path = "..." + rel_path[-32:]
+        sys.stdout.write(f"\r\033[96m[*]\033[0m Scan progress: [\033[92m{bar}\033[0m] \033[93m{percent:5.1f}%\033[0m ({current}/{total}) \033[90m{rel_path:<35}\033[0m")
+        sys.stdout.flush()
+
+    # Load configuration
+    from archon.modules.settings_manager import load_config
+    config = load_config(target_path / "archon-config.json")
+
+    # 2. Run repository scanning
+    scanner = RepositoryScanner(target_path)
+    results = scanner.scan(progress_callback=progress_callback)
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+    
+    # 3. Create the timestamped report folder
+    local_time = time.localtime(results.get('start_time', time.time()))
+    timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", local_time)
+
+    config_output = config.get('general', {}).get('output_folder', 'archon-one')
+    if output is not None:
+        output_base = Path(output).resolve()
+    else:
+        output_base = Path(config_output)
+        if not output_base.is_absolute():
+            output_base = target_path / output_base
+
+    if config.get('general', {}).get('create_timestamp_folder', True):
+        report_root = output_base / timestamp
+    else:
+        report_root = output_base
+    
+    typer.secho("[*] Generating knowledge graph reports...", fg=typer.colors.CYAN)
+    report_folder_graph = report_root / "06_knowledge_graph"
+    reporter_graph = KnowledgeGraphReporter(results, report_folder_graph)
+    reporter_graph.generate_reports()
+    
+    typer.secho(f"\n[+] Knowledge Graph saved to:\n   {report_folder_graph}", fg=typer.colors.GREEN, bold=True)
     typer.secho("==================================================\n", fg=typer.colors.GREEN)
 
 @app.command(name="report")
@@ -396,6 +486,12 @@ def git_command(
                 reporter_intelligence = RepositoryIntelligenceReporter(results, report_folder_intelligence)
                 reporter_intelligence.generate_reports()
 
+            if config.get('modules', {}).get('knowledge_graph', True):
+                typer.secho("[*] Generating knowledge graph reports...", fg=typer.colors.CYAN)
+                report_folder_graph = report_root / "06_knowledge_graph"
+                reporter_graph = KnowledgeGraphReporter(results, report_folder_graph)
+                reporter_graph.generate_reports()
+
             typer.secho("[*] Finalizing scan and saving reports...", fg=typer.colors.CYAN)
 
             duration = results['scan_duration']
@@ -449,7 +545,7 @@ def about_command():
     typer.secho("================================================================================", fg=typer.colors.CYAN)
     typer.echo()
     typer.secho("Developer: Viraj Ravani", fg=typer.colors.YELLOW, bold=True)
-    typer.secho("Version:   0.1.0", fg=typer.colors.WHITE)
+    typer.secho("Version:   0.2.0", fg=typer.colors.WHITE)
     typer.secho("License:   MIT", fg=typer.colors.WHITE)
     typer.secho("================================================================================", fg=typer.colors.CYAN)
 

@@ -893,7 +893,8 @@ def generate_unified_html_report(output_dir: Path):
         ("Security Checkers", "02_security"),
         ("Code Analysis", "03_Code_Analysis"),
         ("Contributor Analysis", "04_Contributor_Analysis"),
-        ("Repository Intelligence", "05_Repository_Intelligence")
+        ("Repository Intelligence", "05_Repository_Intelligence"),
+        ("Knowledge Graph", "06_knowledge_graph")
     ]
 
     modules_payload = []

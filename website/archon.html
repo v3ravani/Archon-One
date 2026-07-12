@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archon One - Code Analysis, Security Auditing & Repository Intelligence Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load Mermaid.js for architecture graphs with black and white configurations -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            themeVariables: {
+                background: '#ffffff',
+                primaryColor: '#ffffff',
+                primaryTextColor: '#111111',
+                lineColor: '#d0d7de',
+                secondaryColor: '#f6f8fa',
+                tertiaryColor: '#f6f8fa'
+            }
+        });
+    </script>
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button id="menu-toggle" class="menu-toggle">☰</button>
+            <a href="#home" class="logo-section">
+                <span>Archon One</span>
+            </a>
+        </div>
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search documentation...">
+        </div>
+        <nav class="header-links">
+            <a href="#installation">Installation</a>
+            <a href="#cli">CLI Reference</a>
+            <a href="#modules">Modules</a>
+            <a href="https://github.com/v3ravani/Archon-One" class="btn-outline" target="_blank">GitHub</a>
+            <a href="https://pypi.org/project/archon-one" class="btn-black" target="_blank">PyPI</a>
+        </nav>
+    </header>
+
+    <div class="layout-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <!-- Mobile-only search and links -->
+            <div class="mobile-only-search">
+                <input type="text" id="mobile-search-input" class="search-input" placeholder="Search documentation...">
+            </div>
+            <div class="mobile-only-links">
+                <div class="sidebar-heading">Navigation Links</div>
+                <nav class="sidebar-nav">
+                    <a href="#installation">Installation</a>
+                    <a href="#cli">CLI Reference</a>
+                    <a href="#modules">Modules</a>
+                    <a href="https://github.com/v3ravani/Archon-One" target="_blank">GitHub</a>
+                    <a href="https://pypi.org/project/archon-one" target="_blank">PyPI</a>
+                </nav>
+            </div>
+
+            <div class="sidebar-heading">Getting Started</div>
+            <nav class="sidebar-nav">
+                <a href="#home" class="active">Overview</a>
+                <a href="#features">Key Features</a>
+                <a href="#installation">Installation</a>
+                <a href="#quick-start">Quick Start</a>
+            </nav>
+
+            <div class="sidebar-heading">Reference Manual</div>
+            <nav class="sidebar-nav">
+                <a href="#cli">CLI Command Suite</a>
+                <a href="#architecture">System Architecture</a>
+                <a href="#settings">Settings Reference</a>
+                <a href="#config-json">Configuration File</a>
+            </nav>
+
+            <div class="sidebar-heading">Modules Detailed</div>
+            <nav class="sidebar-nav">
+                <a href="#mod1">Module 01: Code Metrics</a>
+                <a href="#mod2">Module 02: Security Audits</a>
+                <a href="#mod3">Module 03: Code Analysis</a>
+                <a href="#mod4">Module 04: Contributor Stats</a>
+                <a href="#mod5">Module 05: Repo Intelligence</a>
+                <a href="#mod6">Module 06: Knowledge Graph</a>
+            </nav>
+
+            <div class="sidebar-heading">Outputs & Guides</div>
+            <nav class="sidebar-nav">
+                <a href="#output-structure">Output Directory</a>
+                <a href="#report-formats">Report Formats</a>
+                <a href="#html-reports">HTML Report Guide</a>
+                <a href="#examples">Examples & Case Studies</a>
+                <a href="#performance">Performance Metrics</a>
+                <a href="#supported-languages">Languages Matrix</a>
+            </nav>
+
+            <div class="sidebar-heading">Community & Support</div>
+            <nav class="sidebar-nav">
+                <a href="#faq">Frequently Asked</a>
+                <a href="#roadmap">Project Roadmap</a>
+                <a href="#contributing">Contributing Guide</a>
+                <a href="#license">License Terms</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- Hero Section -->
+            <section id="home" class="hero doc-section">
+                <h1>Archon One</h1>
+                <p class="hero-subtitle">Archon One is a comprehensive repository intelligence platform that analyzes software projects and generates detailed reports covering code metrics, security, maintainability, contributors, repository health, and a machine-readable Knowledge Graph. The generated graph models relationships between files, classes, functions, dependencies, APIs, configurations, and database objects, enabling faster repository navigation and improving how developers and AI systems understand large codebases.</p>
+                <div class="hero-badges">
+                    <span class="badge">Version 0.2.0</span>
+                    <span class="badge">Python >= 3.11</span>
+                    <span class="badge">License: MIT</span>
+
+                </div>
+                <div class="hero-buttons">
+                    <a href="#quick-start" class="btn-black">Get Started</a>
+                    <a href="#installation" class="btn-outline">Install Guide</a>
+                </div>
+
+                <hr>
+
+                <h2>Project Overview</h2>
+                <p>Archon One performs advanced source code scanning, complexity measurements, security vulnerability
+                    scanning, and contributor attribution directly from your local terminal. Unlike traditional code
+                    analyzers that require cloud APIs and remote network transmission, Archon One runs completely
+                    client-side, ensuring that proprietary IP and source files never leave the machine.</p>
+                <p>It generates structured report tables in text, JSON datasets, Markdown files, and stand-alone
+                    interactive HTML platforms. This tool is designed for private developers, security teams, and
+                    companies looking to audit local code bases securely and efficiently.</p>
+
+                <div class="card-grid">
+                    <div class="card doc-sub-item">
+                        <h3>Offline First</h3>
+                        <p>No connections, no API keys, no transmission. Every analysis stays on your machine.</p>
+                    </div>
+                    <div class="card doc-sub-item">
+                        <h3>Multilingual</h3>
+                        <p>Supports Python, JS, TS, HTML, CSS, C/C++, Java, Go, Rust, and more.</p>
+                    </div>
+                    <div class="card doc-sub-item">
+                        <h3>6 Engine Modules</h3>
+                        <p>Metrics, security rules, complexity smells, git ownership, repo intelligence, and Knowledge Graph.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features -->
+            <section id="features" class="doc-section">
+                <h2>Key Features</h2>
+                <p>Archon One is packed with robust scanning capabilities categorized across functional units of code
+                    evaluation:</p>
+
+                <div class="doc-sub-item">
+                    <h3>Core Scanning & Metrics</h3>
+                    <p>Accurate line counts (Physical, Logical, Blank, Comment), character counts, and stateful comment
+                        extraction rules for different syntaxes.</p>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Security Checker</h3>
+                    <p>Detects committed private keys, AWS tokens, hardcoded IP configurations, weak cryptographic
+                        hashing, dangerous function execution (like <code>eval</code>), hardcoded Authorization
+                        headers/tokens, and XML External Entity (XXE) vulnerabilities.</p>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Code Analysis & Smells</h3>
+                    <p>Finds structural smells like God Functions, Lazy Classes, Message Chains, Empty catch/except
+                        blocks, Empty Classes, and Deep Nesting logic.</p>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Git Intelligence & Ownership</h3>
+                    <p>Calculates ownership distributions, commit activity, bus factors, risk areas, and developer
+                        activity statistics directly from local git transaction history.</p>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Unified Reports</h3>
+                    <p>Saves individual text/JSON files per category, and consolidates them into a single interactive
+                        HTML file.</p>
+                </div>
+            </section>
+
+            <!-- Installation -->
+            <section id="installation" class="doc-section">
+                <h2>Installation</h2>
+                <p>Archon One requires Python 3.11 or greater and works across Windows, Linux, and macOS platforms.</p>
+
+                <div class="doc-sub-item">
+                    <h3>From PyPI</h3>
+                    <p>Install the production-ready package directly using pip:</p>
+                    <pre><code>pip install archon-one</code></pre>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>From Source (Development Setup)</h3>
+                    <p>To run Archon One in development mode, clone the repository and install dependencies:</p>
+                    <pre><code>git clone https://github.com/v3ravani/Archon-One
+cd Archon-One
+pip install -e ".[dev]"</code></pre>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Troubleshooting</h3>
+                    <p>Ensure that git is installed on your command path to allow contributor and commit analysis. On
+                        Windows, if python command mapping fails, check environment path variables.</p>
+                </div>
+            </section>
+
+            <!-- Quick Start -->
+            <section id="quick-start" class="doc-section">
+                <h2>Quick Start</h2>
+                <p>Get up and running with your first scan in seconds.</p>
+
+                <div class="doc-sub-item">
+                    <ol>
+                        <li>
+                            <p><strong>Run scan:</strong> Run scan on the current directory:</p>
+                            <pre><code>archon scan</code></pre>
+                        </li>
+                        <li>
+                            <p><strong>Review outputs:</strong> The report files will be saved in the
+                                <code>archon-one/</code> directory with a sub-folder matching the scan timestamp.
+                            </p>
+                        </li>
+                        <li>
+                            <p><strong>Configure settings:</strong> Start the settings server to modify rule thresholds:
+                            </p>
+                            <pre><code>archon settings</code></pre>
+                        </li>
+                        <li>
+                            <p><strong>Scan Remote Repository:</strong> Clone and scan a remote GitHub repository
+                                directly:</p>
+                            <pre><code>archon git https://github.com/v3ravani/HogwartsHackademy</code></pre>
+                        </li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- CLI Reference -->
+            <section id="cli" class="doc-section">
+                <h2>CLI Command Suite</h2>
+                <p>Detailed reference for every command available in the Archon One command-line utility.</p>
+
+                <div class="doc-sub-item">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Command</th>
+                                    <th>Syntax</th>
+                                    <th>Arguments & Options</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>scan</code></td>
+                                    <td><code>archon scan [path] [options]</code></td>
+                                    <td><code>[path]</code>, <code>-o, --output</code></td>
+                                    <td>Scans the specified directory path (defaults to current directory) and saves
+                                        reports.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>graph</code></td>
+                                    <td><code>archon graph [path] [options]</code></td>
+                                    <td><code>[path]</code>, <code>-o, --output</code></td>
+                                    <td>Statically parses code structures to construct nodes, edges, and dependencies graph reports.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>git</code></td>
+                                    <td><code>archon git [url] [options]</code></td>
+                                    <td><code>[url]</code>, <code>-o, --output</code></td>
+                                    <td>Clones a remote repository to a temp directory, scans it, writes output reports,
+                                        and cleans up.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>settings</code></td>
+                                    <td><code>archon settings [options]</code></td>
+                                    <td><code>--port [int]</code>, <code>--no-browser</code></td>
+                                    <td>Launches the local HTTP settings manager interface to edit configurations.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>help</code></td>
+                                    <td><code>archon help</code></td>
+                                    <td>None</td>
+                                    <td>Shows the console command running guide.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>about</code></td>
+                                    <td><code>archon about</code></td>
+                                    <td>None</td>
+                                    <td>Displays version, developer portfolio (www.virajravani.in), and license
+                                        information.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Architecture -->
+            <section id="architecture" class="doc-section">
+                <h2>System Architecture</h2>
+                <p>The following diagrams illustrate the processing flow and execution sequence inside Archon One.</p>
+
+                <div class="doc-sub-item">
+                    <h3>Pipeline Workflow</h3>
+                    <div class="mermaid">
+                        graph TD
+                        A[CLI Trigger / Path Input] --> B[Load archon-config.json]
+                        B --> C[RepositoryScanner Core]
+                        C --> D[Filter Ignored Files]
+                        D --> E[Collect Source Code Files]
+                        E --> F[Run Modules 01 to 06]
+                        F --> G[Generate Formatted Outputs]
+                        G --> H[Unified HTML / JSON / TXT / MD]
+                    </div>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Module Relationship Mapping</h3>
+                    <div class="mermaid">
+                        graph LR
+                        M1[Module 01: Code Metrics] --> M5[Module 05: Health score]
+                        M2[Module 02: Security Audits] --> M5
+                        M3[Module 03: Code Analysis] --> M5
+                        M4[Module 04: Contributor analysis] --> M5
+                        M1 & M2 & M3 & M4 & M5 --> M6[Module 06: Knowledge Graph]
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Reference -->
+            <section id="settings" class="doc-section">
+                <h2>Settings Reference</h2>
+                <p>Configure scanning parameters, thresholds, and output rules. Settings are loaded from
+                    <code>archon-config.json</code> in the workspace.
+                </p>
+
+                <div class="doc-sub-item">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Setting Parameter</th>
+                                    <th>Category</th>
+                                    <th>Default Value</th>
+                                    <th>Description / Allowed Range</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>project_name</code></td>
+                                    <td>General</td>
+                                    <td><code>"Archon One Project"</code></td>
+                                    <td>Display name for the target project report header.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>output_folder</code></td>
+                                    <td>General</td>
+                                    <td><code>"archon-one"</code></td>
+                                    <td>Directory name where report files are stored.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>create_timestamp_folder</code></td>
+                                    <td>General</td>
+                                    <td><code>true</code></td>
+                                    <td>Store scan reports in sub-directories matching execution timestamp.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>ignore_directories</code></td>
+                                    <td>Ignore Rules</td>
+                                    <td><code>["node_modules", ".git", "venv", "build"]</code></td>
+                                    <td>Skip directories with these exact folder names during file traversal.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>max_file_size</code></td>
+                                    <td>Ignore Rules</td>
+                                    <td><code>10000000</code></td>
+                                    <td>Max size in bytes for files included in analysis scans.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>minimum_severity</code></td>
+                                    <td>Security</td>
+                                    <td><code>"Low"</code></td>
+                                    <td>Filter level: Critical, High, Medium, Low, Informational.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration File -->
+            <section id="config-json" class="doc-section">
+                <h2>Configuration File (archon-config.json)</h2>
+                <p>The configuration file structures all options. Here is a sample file schema:</p>
+                <div class="doc-sub-item">
+                    <pre><code>{
+  "general": {
+    "project_name": "Archon One Project",
+    "output_folder": "archon-one",
+    "create_timestamp_folder": true
+  },
+  "modules": {
+    "code_metrics": true,
+    "security": true,
+    "code_analysis": true,
+    "contributor_analysis": true,
+    "repository_intelligence": true,
+    "knowledge_graph": true
+  },
+  "knowledge_graph": {
+    "include_classes": true,
+    "include_functions": true,
+    "include_dependencies": true,
+    "include_apis": true,
+    "include_database": true,
+    "include_configurations": true,
+    "max_depth": 10,
+    "min_node_connections": 1
+  },
+  "ignore_rules": {
+    "ignore_directories": [
+      "node_modules",
+      ".git",
+      "venv",
+      "build",
+      "dist",
+      "coverage"
+    ],
+    "ignore_files": [
+      "*.min.js",
+      "*.min.css"
+    ],
+    "ignore_extensions": [
+      "png",
+      "jpg",
+      "ico"
+    ]
+  }
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- Module 01 -->
+            <section id="mod1" class="doc-section">
+                <h2>Module 01: Code Metrics</h2>
+                <p>Calculates lines of code (LOC), file sizes, language distribution, comment density, and directory
+                    structure profiles.</p>
+                <div class="doc-sub-item">
+                    <h3>Key Metrics & Formulas</h3>
+                    <ul>
+                        <li><strong>Physical Lines of Code (PLOC)</strong>: Total file newline counts.</li>
+                        <li><strong>Logical Lines of Code (LLOC)</strong>: Lines containing active statements, excluding
+                            blank lines and pure comments.</li>
+                        <li><strong>Comment Density</strong>: <code>(Comment Lines / Total Lines) * 100</code>. Density
+                            below 10% triggers warnings.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Module 02 -->
+            <section id="mod2" class="doc-section">
+                <h2>Module 02: Security Audits</h2>
+                <p>Inspects repositories for exposed keys, misconfigurations, and dependency checks.</p>
+                <div class="doc-sub-item">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>Detection Focus</th>
+                                    <th>Action Recommendation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>License Compliance Scanner</strong></td>
+                                    <td>Checks license texts and checks against copyleft terms (GPL, LGPL, AGPL).</td>
+                                    <td>Ensure copyleft licenses align with project commercial models.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>File Permission Audit</strong></td>
+                                    <td>Audits world-writable files or non-executable script attributes.</td>
+                                    <td>Restrict write permissions or configure user execution bits.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sensitive File Detector</strong></td>
+                                    <td>Checks configuration and key dumps (e.g. <code>.env</code>, <code>id_rsa</code>,
+                                        <code>.pem</code>, <code>.keystore</code>, <code>firebase-admin.json</code>).
+                                    </td>
+                                    <td>Remove configuration files from history and include in gitignore.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Docker Security Scan</strong></td>
+                                    <td>Checks <code>Dockerfile</code> or docker-compose definitions for USER root,
+                                        unpinned bases, or privileged flags.</td>
+                                    <td>Avoid running as root, pin base tags, and drop privileged settings.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CI/CD Workflow Scanner</strong></td>
+                                    <td>Audits CI yaml configurations for unpinned action hashes.</td>
+                                    <td>Pin Action commits to stable SHAs.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Git Ignore Security Audit</strong></td>
+                                    <td>Verifies standard credential formats are ignored in <code>.gitignore</code>.
+                                    </td>
+                                    <td>Add env and certificate extensions to ignore rules.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Logging Security Analysis</strong></td>
+                                    <td>Scans print/logging parameters containing credential terms (password, api_key).
+                                    </td>
+                                    <td>Mask credentials prior to dispatching messages to buffers.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Unsafe File Operation Detection</strong></td>
+                                    <td>Checks path string additions or recursive directory wipes.</td>
+                                    <td>Replace string addition with path join library features.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Security Best Practices</strong></td>
+                                    <td>Inspects workspace for missing gitignores, policies, licenses, or lockfiles.
+                                    </td>
+                                    <td>Add standard repository policy documents.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cryptographic Key Scanner</strong></td>
+                                    <td>Matches certificate blocks and private key files.</td>
+                                    <td>Purge private key data from tracked resources.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module 03 -->
+            <section id="mod3" class="doc-section">
+                <h2>Module 03: Code Analysis</h2>
+                <p>Measures code complexity, nested structures, duplication ratios, and code smells.</p>
+                <div class="doc-sub-item">
+                    <h3>Monitored Code Smells</h3>
+                    <ul>
+                        <li><strong>God Function</strong>: Functions whose LOC/complexity index exceeds clean code
+                            thresholds.</li>
+                        <li><strong>Empty Classes</strong>: Dead stub configurations containing zero active attributes
+                            or method overrides.</li>
+                        <li><strong>Deep Nesting</strong>: Conditional block depth exceeding settings limits (e.g.,
+                            nesting depth > 4).</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Module 04 -->
+            <section id="mod4" class="doc-section">
+                <h2>Module 04: Contributor Stats</h2>
+                <p>Interrogates Git history to trace ownership profiles, activity ranges, and developer risk factors.
+                </p>
+                <div class="doc-sub-item">
+                    <h3>Key Insights</h3>
+                    <ul>
+                        <li><strong>Bus Factor</strong>: Minimum number of engineers whose departure stops progress
+                            (based on file ownership).</li>
+                        <li><strong>Knowledge Silos</strong>: Files where a single author has written over 80% of lines.
+                        </li>
+                        <li><strong>Commit Velocity</strong>: Traces modifications, deletions, and active commits over
+                            time.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Module 05 -->
+            <section id="mod5" class="doc-section">
+                <h2>Module 05: Repository Intelligence</h2>
+                <p>Aggregates scores across all metrics units to define a unified quality report card.</p>
+                <div class="doc-sub-item">
+                    <h3>Grade Map</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Grade</th>
+                                    <th>Score Threshold</th>
+                                    <th>Status Assessment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Grade A</td>
+                                    <td>&gt;= 95.0</td>
+                                    <td>Excellent structural and security profile.</td>
+                                </tr>
+                                <tr>
+                                    <td>Grade B</td>
+                                    <td>85.0 - 94.99</td>
+                                    <td>Good posture, minor issues detected.</td>
+                                </tr>
+                                <tr>
+                                    <td>Grade C</td>
+                                    <td>70.0 - 84.99</td>
+                                    <td>Fair posture, moderate issues.</td>
+                                </tr>
+                                <tr>
+                                    <td>Grade D</td>
+                                    <td>50.0 - 69.99</td>
+                                    <td>Poor posture, significant refactoring needed.</td>
+                                </tr>
+                                <tr>
+                                    <td>Grade F</td>
+                                    <td>&lt; 50.0</td>
+                                    <td>Vulnerable code containing high technical debt.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module 06 -->
+            <section id="mod6" class="doc-section">
+                <h2>Module 06: Knowledge Graph</h2>
+                <p>Generates a machine-readable representation of codebases, modeling dependencies, hierarchies, and configurations.</p>
+                <div class="doc-sub-item">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><strong>Graph Nodes</strong>: Automatically discover and create nodes for classes, functions, DB models, API endpoints, etc.</li>
+                        <li><strong>Relationships Mapping</strong>: Map code calls, imports, inheritance, exceptions, and environment configurations.</li>
+                        <li><strong>Customization Toggles</strong>: Filter nodes, relations, classes, databases, API definitions, environment configuration files, or limit traversal depth.</li>
+                    </ul>
+                </div>
+                <div class="doc-sub-item">
+                    <h3>Knowledge Graph Customizations</h3>
+                    <p>The Knowledge Graph generation can be fully customized using configuration parameters under the <code>knowledge_graph</code> section in the settings panel or <code>archon-config.json</code>:</p>
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Option Key</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>include_classes</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Include classes, interfaces, enums, and structs.</td>
+                            </tr>
+                            <tr>
+                                <td><code>include_functions</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Include standalone functions, methods, and constructors.</td>
+                            </tr>
+                            <tr>
+                                <td><code>include_dependencies</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Include package/module imports and dependency chains.</td>
+                            </tr>
+                            <tr>
+                                <td><code>include_apis</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Include web API route definitions and endpoint controllers.</td>
+                            </tr>
+                            <tr>
+                                <td><code>include_database</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Include database tables, models, and query linkages.</td>
+                            </tr>
+                            <tr>
+                                <td><code>include_configurations</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code></td>
+                                <td>Include environment variables, config files, and feature flags.</td>
+                            </tr>
+                            <tr>
+                                <td><code>max_depth</code></td>
+                                <td>Integer</td>
+                                <td><code>10</code></td>
+                                <td>BFS traversal depth limit to cap relationship exploration.</td>
+                            </tr>
+                            <tr>
+                                <td><code>min_node_connections</code></td>
+                                <td>Integer</td>
+                                <td><code>1</code></td>
+                                <td>Skip/prune nodes with connection degree below this value.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Output Structure -->
+            <section id="output-structure" class="doc-section">
+                <h2>Output Directory Structure</h2>
+                <p>Analysis runs generate the following structured folder hierarchy:</p>
+                <div class="doc-sub-item">
+                    <pre><code>archon-one/
+└── 2026-07-10_20-55-05/
+    ├── 01_metrics/
+    │   ├── 01_repository_summary.txt
+    │   ├── 02_file_metrics.txt
+    │   └── 03_language_distribution.txt
+    ├── 02_security/
+    │   ├── 01_security_summary.txt
+    │   └── 02_vulnerabilities.txt
+    ├── 03_Code_Analysis/
+    │   └── 01_complexity_report.txt
+    ├── 04_Contributor_Analysis/
+    │   └── 01_git_history.txt
+    ├── 05_Repository_Intelligence/
+    │   └── 01_health_rating.txt
+    ├── 06_knowledge_graph/
+    │   ├── graph_summary.txt
+    │   ├── graph_summary.json
+    │   └── repository_map.md
+    └── index.html (Unified Interactive HTML Report)</code></pre>
+                </div>
+            </section>
+
+            <!-- Report Formats -->
+            <section id="report-formats" class="doc-section">
+                <h2>Report Formats</h2>
+                <p>Archon One exports data across multiple representations to support varied workflows:</p>
+                <div class="card-grid">
+                    <div class="card doc-sub-item">
+                        <h3>Plain Text (TXT)</h3>
+                        <p>ASCII-formatted tables that are easy to view directly from the terminal or CLI pipelines.</p>
+                    </div>
+                    <div class="card doc-sub-item">
+                        <h3>JSON Data</h3>
+                        <p>Fully structured payloads suitable for automated consumption and custom dashboards.</p>
+                    </div>
+                    <div class="card doc-sub-item">
+                        <h3>Markdown (MD)</h3>
+                        <p>Rich documentation files tailored for repository wikis and PR logs.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HTML Reports -->
+            <section id="html-reports" class="doc-section">
+                <h2>HTML Report Guide</h2>
+                <p>The unified HTML report integrates results from all modules into a single, interactive, client-side
+                    document.</p>
+                <div class="doc-sub-item">
+                    <ul>
+                        <li><strong>Tabbed Navigation</strong>: Quickly switch between Code Metrics, Security findings,
+                            Contributor stats, and Health grades.</li>
+                        <li><strong>Live Searching & Filtering</strong>: Instantly search table records by file names,
+                            rule categories, or severity.</li>
+                        <li><strong>Data Exporting</strong>: Includes actions to download tables directly to CSV or
+                            print clean copy sheets.</li>
+                        <li><strong>Offline Dependency</strong>: Every report compiles inline CSS and JS, running
+                            entirely offline.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Examples -->
+            <section id="examples" class="doc-section">
+                <h2>Examples & Case Studies</h2>
+                <p>Verify CLI runs and output layouts through standard demonstration logs.</p>
+                <div class="doc-sub-item">
+                    <pre><code>$ archon scan
+[*] Scan progress: [====================] 100.0% (26/26)
+[*] Generating metrics reports...
+[*] Generating security reports...
+[*] Generating code analysis reports...
+[*] Generating contributor analysis reports...
+[*] Generating repository intelligence reports...
+[*] Finalizing scan and saving reports...
+
+==================================================
+               SCAN SUMMARY
+==================================================
+Total Files Found   31
+Files Scanned       19
+Files Ignored       12
+Total Size Scanned  624.86 KB
+Scan Duration       1.007 seconds
+==================================================
+[+] Reports saved to:
+   C:\Users\ravan\Desktop\archonone\archon-one\2026-07-10_20-59-13
+==================================================</code></pre>
+                </div>
+            </section>
+
+            <!-- Performance -->
+            <section id="performance" class="doc-section">
+                <h2>Performance Metrics</h2>
+                <p>Archon One is optimized to handle large repositories with minimal memory and execution overhead.</p>
+                <div class="doc-sub-item">
+                    <ul>
+                        <li><strong>Optimized File System Traversal</strong>: Scans only supported file extensions,
+                            bypassing heavy media and dependency files.</li>
+                        <li><strong>Fast Regex Compilations</strong>: All security match rules compile prior to line
+                            scans to accelerate pattern checking.</li>
+                        <li><strong>Sub-Second Execution</strong>: Typical repositories under 500 files scan in less
+                            than 1.0 second.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Supported Languages -->
+            <section id="supported-languages" class="doc-section">
+                <h2>Supported Languages Matrix</h2>
+                <p>Compatibility matrix details parser and code metrics support levels:</p>
+                <div class="doc-sub-item">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Language</th>
+                                    <th>Metrics Support</th>
+                                    <th>Security Support</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Python (<code>.py</code>)</td>
+                                    <td>Full (AST parsing)</td>
+                                    <td>Full Regex & AST</td>
+                                    <td>Primary supported language.</td>
+                                </tr>
+                                <tr>
+                                    <td>JavaScript / TypeScript (<code>.js, .ts</code>)</td>
+                                    <td>Full (Lexical)</td>
+                                    <td>Full Regex</td>
+                                    <td>Optimized comments parser.</td>
+                                </tr>
+                                <tr>
+                                    <td>HTML (<code>.html</code>)</td>
+                                    <td>Full (Lexical)</td>
+                                    <td>Regex Configuration</td>
+                                    <td>Audits inline scripts and stylesheets.</td>
+                                </tr>
+                                <tr>
+                                    <td>C / C++ (<code>.c, .cpp, .h</code>)</td>
+                                    <td>Full (Lexical)</td>
+                                    <td>Standard Checks</td>
+                                    <td>Identifies legacy security calls (e.g. <code>strcpy</code>).</td>
+                                </tr>
+                                <tr>
+                                    <td>Java (<code>.java</code>)</td>
+                                    <td>Full (Lexical)</td>
+                                    <td>Standard Checks</td>
+                                    <td>Checks imports and hardcoded keys.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section id="faq" class="doc-section">
+                <h2>Frequently Asked Questions</h2>
+                <p>Find answers to common questions about installing, configuring, and executing Archon One.</p>
+
+                <div class="doc-sub-item">
+                    <details>
+                        <summary>1. What is Archon One?</summary>
+                        <p>Archon One is a client-side command line code analysis, security auditing, and repository
+                            intelligence platform that executes audits completely offline.</p>
+                    </details>
+                    <details>
+                        <summary>2. Does Archon One upload my source code to any cloud servers?</summary>
+                        <p>No. All scans, regex pattern matches, and report generation routines are executed locally on
+                            your machine. No data is transmitted to external servers.</p>
+                    </details>
+                    <details>
+                        <summary>3. What is the difference between Archon One and standard analyzers?</summary>
+                        <p>Standard tools usually require online integrations and upload files to their servers. Archon
+                            One guarantees 100% offline security, compiling full reports (including interactive HTML
+                            interfaces) locally.</p>
+                    </details>
+                    <details>
+                        <summary>4. What are the installation requirements?</summary>
+                        <p>You need Python >= 3.11 and the Git command line utility installed and available in your
+                            environment path.</p>
+                    </details>
+                    <details>
+                        <summary>5. How do I install Archon One via pip?</summary>
+                        <p>Simply run <code>pip install archon-one</code>.</p>
+                    </details>
+                    <details>
+                        <summary>6. How can I run a scan on a directory?</summary>
+                        <p>Run <code>archon scan</code> to scan the current directory, or specify a path:
+                            <code>archon scan /path/to/project</code>.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>7. How do I scan a remote repository?</summary>
+                        <p>Use the git command: <code>archon git https://github.com/v3ravani/HogwartsHackademy</code>.
+                            It will clone, analyze, generate reports locally, and safely clean up the temporary
+                            workspace files.</p>
+                    </details>
+                    <details>
+                        <summary>8. How do I customize settings?</summary>
+                        <p>Run <code>archon settings</code> to launch the interactive browser configuration editor
+                            locally, or edit the <code>archon-config.json</code> file in your workspace directory
+                            manually.</p>
+                    </details>
+                    <details>
+                        <summary>9. What is the "Code Health Index"?</summary>
+                        <p>It is an aggregated score out of 100 calculated by combining metrics, security violations,
+                            complexity findings, and repository history to represent overall code quality.</p>
+                    </details>
+                    <details>
+                        <summary>10. What is "Bus Factor"?</summary>
+                        <p>A metric indicating the distribution risk of a repository, representing the minimum number of
+                            authors who own over 80% of files.</p>
+                    </details>
+                    <details>
+                        <summary>11. Why do I get a permission error on Windows when using the git scan command?
+                        </summary>
+                        <p>On Windows, Git files inside the `.git` directory may write read-only permissions. The tool
+                            has been updated to override file access locks, clear the read-only attribute, and retry the
+                            directory cleanup safely.</p>
+                    </details>
+                    <details>
+                        <summary>12. How do I disable a specific analysis module?</summary>
+                        <p>Toggle the target module Boolean value (e.g. <code>"security": false</code>) under the
+                            "modules" section inside the local <code>archon-config.json</code> configuration file.</p>
+                    </details>
+                    <details>
+                        <summary>13. Where are generated scan reports saved?</summary>
+                        <p>By default, they are output to the <code>archon-one/</code> directory inside your current
+                            working directory, organized into sub-folders by scan timestamp.</p>
+                    </details>
+                    <details>
+                        <summary>14. Does Archon One support JSON exports?</summary>
+                        <p>Yes. Every report generated is output as text tables, JSON data payloads, and Markdown files.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>15. What security checks are currently built in?</summary>
+                        <p>It checks for hardcoded credentials (AWS, SSH keys), weak cryptography usage (MD5), insecure
+                            functions (eval), XXE parser vulnerabilities, and exposed Bearer authorization tokens.</p>
+                    </details>
+                    <details>
+                        <summary>16. Can I run scans on code bases that aren't Git repositories?</summary>
+                        <p>Yes, but contributor analysis metrics (Module 04) will be skipped as they rely on git
+                            transaction logs. Other modules (Metrics, Security, Code Analysis) will execute normally.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>17. Does the tool support file and folder ignore rules?</summary>
+                        <p>Yes. You can customize ignored extensions, ignore specific files, or skip entire directories
+                            (e.g. <code>node_modules</code>) using settings.</p>
+                    </details>
+                    <details>
+                        <summary>18. How do I reset settings to defaults?</summary>
+                        <p>Execute <code>archon config reset</code> to reset settings back to default parameters.</p>
+                    </details>
+                    <details>
+                        <summary>19. Can I customize the output folder path?</summary>
+                        <p>Yes, use the <code>-o</code> or <code>--output</code> CLI option flag during execution to
+                            output reports to any custom folder path.</p>
+                    </details>
+                    <details>
+                        <summary>20. What is a "God Function"?</summary>
+                        <p class="option-label">A code smell flagged when a function's length or nesting complexity score exceeds threshold
+                            settings.</p>
+                    </details>
+                    <details>
+                        <summary>21. What is the Knowledge Graph module?</summary>
+                        <p>Module 06 constructs a structured representation of the codebase. It statically parses imports, calls, classes, functions, configurations, and database schemas to map how different code files and modules interact, saving the topological data as JSON and MD reports.</p>
+                    </details>
+                    <details>
+                        <summary>22. How is comment density evaluated?</summary>
+                        <p>It calculates the ratio of comment lines to total logical lines of code. Densities below 10%
+                            raise code smell warnings.</p>
+                    </details>
+                    <details>
+                        <summary>23. What is an XXE vulnerability check?</summary>
+                        <p>It flags imports of standard Python XML parsers (e.g. xml.etree) when they are loaded without
+                            explicitly disabling external entity references, or when <code>defusedxml</code> is not
+                            used.</p>
+                    </details>
+                    <details>
+                        <summary>23. What is the difference between sdist and wheel formats?</summary>
+                        <p>An sdist (source distribution) contains raw package source files, while a wheel is a compiled
+                            binary package. Archon One builds both distribution formats successfully.</p>
+                    </details>
+                    <details>
+                        <summary>24. Does the interactive HTML report require an internet connection to run?</summary>
+                        <p>No. All CSS layouts, Javascript behaviors, and tabular search functions are compiled directly
+                            inline. The file runs entirely offline.</p>
+                    </details>
+                    <details>
+                        <summary>25. Can I use Archon One in CI/CD pipeline runs?</summary>
+                        <p>Yes. The tool returns standard shell exit codes (0 for success, 1 for errors) making it easy
+                            to integrate into build workflows.</p>
+                    </details>
+                    <details>
+                        <summary>26. What Python versions are supported?</summary>
+                        <p>Archon One is optimized for Python 3.11, 3.12, 3.13, and 3.14.</p>
+                    </details>
+                    <details>
+                        <summary>27. How does it handle large files?</summary>
+                        <p>Files exceeding the configured file size limit (e.g. 10MB) are automatically ignored during
+                            scanning to optimize speed and resource consumption.</p>
+                    </details>
+                    <details>
+                        <summary>28. Is there a command to check the installed package version?</summary>
+                        <p>Yes, run <code>archon --version</code> or <code>archon -v</code>.</p>
+                    </details>
+                    <details>
+                        <summary>29. Can I contribute to Archon One?</summary>
+                        <p>Yes, contributions are welcome. Fork the repository on GitHub and open a pull request with
+                            unit test coverage.</p>
+                    </details>
+                    <details>
+                        <summary>30. What license does Archon One use?</summary>
+                        <p>Archon One is open-source software licensed under the terms of the MIT License.</p>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Project Roadmap -->
+            <section id="roadmap" class="doc-section">
+                <h2>Project Roadmap</h2>
+                <p>Our upcoming developmental features and improvements scheduled for subsequent updates:</p>
+                <div class="doc-sub-item">
+                    <ul>
+                        <li><strong>Trend Analytics</strong>: Add historical scan aggregation to graph metric changes
+                            over time.</li>
+                        <li><strong>Enhanced Language ASTs</strong>: Integrate detailed syntax tree evaluations for
+                            JavaScript and TypeScript.</li>
+                        <li><strong>CI/CD Reporter Extensions</strong>: Export raw JUnit XML and GitHub action log
+                            tables natively.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Contributing -->
+            <section id="contributing" class="doc-section">
+                <h2>Contributing Guide</h2>
+                <p>We welcome developer contributions to make Archon One even better.</p>
+                <div class="doc-sub-item">
+                    <ol>
+                        <li>Fork the repository: <a href="https://github.com/v3ravani/Archon-One"
+                                target="_blank">github.com/v3ravani/Archon-One</a>.</li>
+                        <li>Create a branch for your feature or bug fix:
+                            <code>git checkout -b feature/cool-new-rule</code>.
+                        </li>
+                        <li>Add test cases under the <code>tests/</code> directory and verify with <code>pytest</code>.
+                        </li>
+                        <li>Open a Pull Request with details on changes and verify package compliance.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- License -->
+            <section id="license" class="doc-section">
+                <h2>License Terms</h2>
+                <p>Archon One is open source software published under the terms of the MIT License.</p>
+                <div class="doc-sub-item">
+                    <p>Copyright (c) 2026 Viraj Ravani. Permission is hereby granted, free of charge, to any person
+                        obtaining a copy of this software and associated documentation files to use, modify, merge,
+                        publish, or distribute packages without limitations.</p>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-grid">
+                    <div class="footer-column">
+                        <h4>Archon One</h4>
+                        <p>Developer: Viraj Ravani</p>
+                        <p>Portfolio: <a href="http://www.virajravani.in" target="_blank">www.virajravani.in</a></p>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Links</h4>
+                        <ul>
+                            <li><a href="https://github.com/v3ravani/Archon-One" target="_blank">GitHub Repository</a>
+                            </li>
+                            <li><a href="https://pypi.org/project/archon-one" target="_blank">PyPI Distribution</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Version Info</h4>
+                        <p>Current: v0.2.0</p>
+                        <p>License: MIT</p>
+                    </div>
+                </div>
+                <hr>
+                <p>&copy; 2026 Viraj Ravani. All rights reserved.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Load Client-side JS -->
+    <script src="script.js"></script>
+</body>
+
+</html>

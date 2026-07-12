@@ -17,6 +17,7 @@
     "code_analysis": true,
     "contributor_analysis": true,
     "repository_intelligence": true,
+    "knowledge_graph": true,
     "run_selected_only": false
   },
   "output": {
@@ -72,16 +73,13 @@
     "max_cognitive_complexity": 15,
     "max_nesting_depth": 5,
     "max_line_length": 120,
-    "max_duplicate_percentage": 5.0,
+    "max_duplicate_percentage": 5,
     "max_duplicate_lines": 10,
-    "min_comment_density": 10.0,
-    "min_maintainability_score": 50.0,
-    "max_technical_debt_score": 50.0,
+    "min_comment_density": 10,
+    "min_maintainability_score": 50,
+    "max_technical_debt_score": 50,
     "max_dependency_depth": 5,
-    "max_import_count": 20,
-    "large_file_warning": 2097152,
-    "critical_file_size": 5242880,
-    "max_folder_size": 104857600
+    "max_import_count": 20
   },
   "security": {
     "enable_secret_detection": true,
@@ -112,7 +110,7 @@
   },
   "advanced": {
     "enable_debug_logs": false,
-    "verbose_logging": false,
+    "verbose_logging": true,
     "save_scan_logs": true,
     "auto_cleanup_old_reports": false,
     "cleanup_after_days": 30,

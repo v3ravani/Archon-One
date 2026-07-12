@@ -26,6 +26,7 @@ DEFAULT_CONFIG = {
     "code_analysis": True,
     "contributor_analysis": True,
     "repository_intelligence": True,
+    "knowledge_graph": True,
     "run_selected_only": False
   },
   "output": {
@@ -89,6 +90,16 @@ DEFAULT_CONFIG = {
     "minimum_severity": "Low",
     "max_secret_length": 128,
     "ignore_example_secrets": True
+  },
+  "knowledge_graph": {
+    "include_classes": True,
+    "include_functions": True,
+    "include_dependencies": True,
+    "include_apis": True,
+    "include_database": True,
+    "include_configurations": True,
+    "max_depth": 10,
+    "min_node_connections": 1
   },
   "performance": {
     "max_worker_threads": 4,

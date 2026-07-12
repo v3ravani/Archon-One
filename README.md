@@ -1,6 +1,6 @@
 # Archon One - Enterprise Code Analysis, Security Auditing & Repository Intelligence Platform
 
-Archon One is a powerful, offline-first code analysis, security auditing, and repository intelligence platform. It processes software projects locally to compile advanced metrics, detect security hazards, inspect structural characteristics, map contributor profiles, and compute repository health indices—instantly and privately.
+Archon One is a comprehensive repository intelligence platform that analyzes software projects and generates detailed reports covering code metrics, security, maintainability, contributors, repository health, and a machine-readable Knowledge Graph. The generated graph models relationships between files, classes, functions, dependencies, APIs, configurations, and database objects, enabling faster repository navigation and improving how developers and AI systems understand large codebases.
 
 This manual documents the architecture, configuration parameters, modules, commands, metrics formulas, and workflows of Archon One.
 
@@ -29,6 +29,7 @@ This manual documents the architecture, configuration parameters, modules, comma
     - [Module 03: Code Analysis](#module-03-code-analysis)
     - [Module 04: Contributor Analysis](#module-04-contributor-analysis)
     - [Module 05: Repository Intelligence](#module-05-repository-intelligence)
+    - [Module 06: Knowledge Graph](#module-06-knowledge-graph)
 18. [Metrics Reference](#18-metrics-reference)
 19. [Module-by-Module Output & Reports Breakdown](#19-module-by-module-output--reports-breakdown)
 20. [Security Rules Reference](#20-security-rules-reference)
@@ -105,7 +106,8 @@ graph TD
     B --> F[Code Analysis Module 03]
     B --> G[Contributor Analysis Module 04]
     B --> H[Repository Intelligence Module 05]
-    D & E & F & G & H --> I[Multi-Format Reporter]
+    B --> O[Knowledge Graph Module 06]
+    D & E & F & G & H & O --> I[Multi-Format Reporter]
     I --> J[TXT ASCII Tables]
     I --> K[JSON Data Files]
     I --> L[Markdown Documents]
@@ -165,8 +167,7 @@ pip install archon-one
 ### From Source (Development Setup)
 Clone the repository and install it in editable mode with development dependencies:
 ```bash
-git clone https://github.com/v3ravani/archonone.git
-cd archonone
+git clone https://github.com/v3ravani/Archon-One
 pip install -e ".[dev]"
 ```
 
@@ -204,6 +205,7 @@ archon scan
 | Command | Description | Arguments | Options | Example |
 |---|---|---|---|---|
 | `archon scan` | Scan repository | `[project_path]` | `-o`, `--output` | `archon scan -o C:\Reports` |
+| `archon graph` | Generate Knowledge Graph | `[project_path]` | `-o`, `--output` | `archon graph -o C:\Reports` |
 | `archon git` | Clone remote GitHub repo and scan | `<repo_url>` | `-o`, `--output` | `archon git https://github.com/user/repo.git` |
 | `archon report` | Compile to unified HTML | `[scan_path]` | None | `archon report archon-one/latest` |
 | `archon config` | Start Settings server | None | `--port` | `archon config --port 8085` |
@@ -254,7 +256,10 @@ archon-one/
     │   ├── 01_security_summary.json
     │   ├── 01_security_summary.md
     │   └── report.html
-    ...
+    ├── 06_knowledge_graph/
+    │   ├── graph_summary.txt
+    │   ├── graph_summary.json
+    │   └── repository_map.md
 ```
 
 ---
@@ -279,7 +284,7 @@ Each module folder includes `report.html` which is completely standalone and wor
 ---
 
 ## 15. Settings Manager
-Run `archon config` to launch the offline dashboard page at `http://localhost:8085`. It divides settings into 9 configurations:
+Run `archon config` to launch the offline dashboard page at `http://localhost:8085`. It divides settings into 10 configurations:
 - **General**: Project name, Output Folder, Timestamp preferences, and Scan paths.
 - **Scan Modules**: Enable/disable metrics, security, complexity, or contributor trackers.
 - **Output**: Formats selection (TXT, JSON, MD, HTML), tables mode, and row limits.
@@ -317,6 +322,7 @@ Configure scanner rules inside `archon-config.json` placed in your repository ro
     "code_analysis": true,
     "contributor_analysis": true,
     "repository_intelligence": true,
+    "knowledge_graph": true,
     "run_selected_only": false
   },
   "output": {
@@ -380,6 +386,16 @@ Configure scanner rules inside `archon-config.json` placed in your repository ro
     "minimum_severity": "Low",
     "max_secret_length": 128,
     "ignore_example_secrets": true
+  },
+  "knowledge_graph": {
+    "include_classes": true,
+    "include_functions": true,
+    "include_dependencies": true,
+    "include_apis": true,
+    "include_database": true,
+    "include_configurations": true,
+    "max_depth": 10,
+    "min_node_connections": 1
   },
   "performance": {
     "max_worker_threads": 4,
@@ -448,6 +464,22 @@ Traces contribution transactions, code ownership, activity history, and knowledg
 Aggregates quality indices to compute health score, overall grade, and prioritized recommendations.
 - **Workflow**: Consolidates scores across Modules 01-04.
 - **Reports**: Health rating, Hotspot analysis, Technical debt breakdown, Scalability indices, Testing analysis, Refactoring opportunities, Change impact analysis, Risk prioritization, Insights list, Metadata.
+
+### Module 06: Knowledge Graph
+Converts the repository structure into a machine-readable graph of folders, files, classes, functions, and database elements, mapping their relationships.
+- **Workflow**: Performs static code analysis and parsing of import, call, class, API, and DB usage patterns.
+- **Node Types**: Repository, Folders, Packages, Modules, Files, Classes, Interfaces, Enums, Structs, Functions, Methods, Constructors, Variables, Constants, Properties, Imports, Exports, API Endpoints, Database Models, Database Tables, Configuration Files, Environment Variables, Dependencies, Exceptions, Decorators, Namespaces, Test Files, Resources.
+- **Relationship Types**: contains, imports, exports, calls, called_by, inherits, implements, creates, instantiates, reads, writes, updates, deletes, depends_on, referenced_by, belongs_to, located_in, tests, tested_by, decorates, throws, catches, uses, defines, extends, communicates_with, configured_by, registered_in, connected_to, linked_with.
+- **Reports**: graph_summary.txt, graph_summary.json, nodes.json, edges.json, symbols.json, imports.json, packages.json, dependencies.json, apis.json, database.json, configurations.json, graph_statistics.json, repository_map.md.
+- **Customization Settings**:
+  - `knowledge_graph.include_classes` (default `true`): Include classes, interfaces, enums, and structs.
+  - `knowledge_graph.include_functions` (default `true`): Include standalone functions, object methods, and constructors.
+  - `knowledge_graph.include_dependencies` (default `true`): Include package/module import chains and circular dependencies.
+  - `knowledge_graph.include_apis` (default `true`): Include API handlers and routing entry points.
+  - `knowledge_graph.include_database` (default `true`): Include database tables, schema models, and access operations.
+  - `knowledge_graph.include_configurations` (default `true`): Include environment variables, feature flags, and configuration parameters.
+  - `knowledge_graph.max_depth` (default `10`): Capping relationship traversal depth (BFS distance) and directory parsing.
+  - `knowledge_graph.min_node_connections` (default `1`): Pruning isolated nodes that do not meet the minimum connection degree threshold.
 
 ---
 
@@ -552,6 +584,23 @@ The following tables describe every output report generated by the scanner modul
 | `09_repository_insights` | TXT, JSON, MD | Overall findings suggestions | Metric category, Observation, Recommendation | None |
 | `10_scan_metadata` | TXT, JSON, MD | Intelligence run metadata | Consolidated run details, Combined module IDs | None |
 
+### Module 06 - Knowledge Graph Outputs
+
+| Filename | Format | Purpose | Columns / Contents | Used By |
+|---|---|---|---|---|
+| `graph_summary` | TXT, JSON | Repository overview and topology summary | General repository stats, nodes/edges summaries, recommendations | None |
+| `nodes` | JSON | List of all graph nodes | ID, Type, Label, Attributes | None |
+| `edges` | JSON | List of all graph relationships | ID, Source, Target, Type, Attributes | None |
+| `symbols` | JSON | Lists code symbols | Classes, interfaces, enums, structs, functions, methods, constructors, variables, constants, properties, imports, exports | None |
+| `imports` | JSON | Imports statistics | Internal/external imports, circular imports, unused imports, relative imports | None |
+| `packages` | JSON | Packages hierarchy and coupling | Packages hierarchy, afferent/efferent coupling, instability | None |
+| `dependencies` | JSON | External and internal dependencies | Internal/external dependencies, transitive dependencies, depths | None |
+| `apis` | JSON | Extracted API endpoints | Endpoints, HTTP methods, controllers, handlers | None |
+| `database` | JSON | Database tables and models | Tables, collections, models, relationships, read/write/delete operations | None |
+| `configurations` | JSON | Configuration settings and environment variables | Config files, env vars, secrets usage, feature flags | None |
+| `graph_statistics` | JSON | Graph topological stats | Total nodes, total edges, density, components, average degree | None |
+| `repository_map` | MD | Markdown repository map | Packages, hierarchy, circular dependencies, stats, recommendations | None |
+
 ---
 
 ## 20. Security Rules Reference
@@ -634,6 +683,14 @@ Consolidates overall scores.
 | `thresholds.min_comment_density` | Float | `10.0` | Comments density alert boundary | `0.0` to `100.0` |
 | `security.minimum_severity` | String | `"Low"` | Severity filter cutoff | Critical/High/Medium/Low |
 | `performance.max_worker_threads` | Integer | `4` | Maximum worker threads pool | `1` to `32` |
+| `knowledge_graph.include_classes` | Boolean | `true` | Include class, interface, enum, and struct entities | None |
+| `knowledge_graph.include_functions` | Boolean | `true` | Include functions, methods, and constructor entities | None |
+| `knowledge_graph.include_dependencies` | Boolean | `true` | Include files dependency relationships and cycles | None |
+| `knowledge_graph.include_apis` | Boolean | `true` | Include web endpoints/route definitions | None |
+| `knowledge_graph.include_database` | Boolean | `true` | Include database models and queries | None |
+| `knowledge_graph.include_configurations` | Boolean | `true` | Include environment variables and config files | None |
+| `knowledge_graph.max_depth` | Integer | `10` | Maximum traversal depth limit | `> 0` |
+| `knowledge_graph.min_node_connections` | Integer | `1` | Skip nodes with fewer total links | `>= 0` |
 
 </details>
 
@@ -1157,6 +1214,44 @@ Priority   File Path             Refactor Action Type   Reasoning Details
 ====================================================
 ```
 
+### Module 06 - Knowledge Graph Samples
+
+#### Sample graph summary table
+```txt
+================================================================================
+                      ARCHON ONE KNOWLEDGE GRAPH REPORT                         
+================================================================================
+Repository Name: archonone
+Repository Path: C:\Users\ravan\Desktop\archonone
+Scan Duration:   0.0850 seconds
+Scan ID:         abc-123-def-456
+--------------------------------------------------------------------------------
+
+[NODE SUMMARY]
+  - Repository               : 1
+  - Folder                   : 3
+  - File                     : 10
+  - Class                    : 5
+  - Function                 : 12
+  - Method                   : 18
+
+[RELATIONSHIP SUMMARY]
+  - contains                 : 15
+  - imports                  : 8
+  - calls                    : 12
+  - defines                  : 35
+
+[GRAPH TOPOLOGY METRICS]
+  - Total Entities/Nodes    : 49
+  - Total Relationships/Edges: 70
+  - Average Node Connections: 1.43
+  - Maximum Node Connections: 12
+  - Graph Density            : 0.0298
+  - Connected Components     : 1
+  - Disconnected Modules     : 0
+================================================================================
+```
+
 ---
 
 ## 32. Appendix B: Module-by-Module Processing Mechanics
@@ -1191,6 +1286,12 @@ Module 05 aggregates the collected metrics data.
 - **Scalability checks**: Evaluates file type growth rates based on file sizes and commit activity, predicting repository expansion.
 - **Blast radius**: Identifies files imported by the largest number of internal modules, flagging them as highly critical dependencies.
 - **Hotspots scoring**: Combines commit frequency and cyclomatic complexity to identify problematic refactoring candidates.
+
+### 6. Module 06: Knowledge Graph Mechanics
+Module 06 converts the repository structure into a machine-readable graph.
+- **Entity Parsing**: Uses regular expressions and string scanning to identify classes, methods, functions, variables, API routes, database tables, and environment variables.
+- **Relationship Extraction**: Links entities by analyzing code imports (internal and external), function calls, inheritance hierarchies, throws/catches exceptions, and DB/API usage.
+- **Topological Analysis**: Computes graph metrics including density, average degree, maximum degree, connected components, and circular imports using pathfinding algorithms.
 
 
 ## 33. Appendix C: Detailed File Schemas & Fields Reference Catalog (50/50 Reports)
@@ -1774,7 +1875,63 @@ JSON Keys:
 - `analysis_timestamp` (string)
 - `modules_consolidated` (list)
 ```
-**Interpretation Guideline**: Cross-reference `modules_consolidated` with individual module metadata reports to verify that all five pipeline stages completed without errors. Missing module IDs indicate partial scan failures.
+**Interpretation Guideline**: Cross-reference `modules_consolidated` with individual module metadata reports to verify that all six pipeline stages completed without errors. Missing module IDs indicate partial scan failures.
+
+### Module 06: Knowledge Graph (06_knowledge_graph)
+
+#### [REPORT] graph_summary
+**Description**: Consolidated repository architecture insights and recommendations.
+```txt
+JSON Keys:
+- `repository_overview` (dict)
+- `node_summary` (dict)
+- `relationship_summary` (dict)
+- `architecture_overview` (dict)
+- `largest_modules` (list)
+- `most_connected_files` (list)
+- `most_connected_classes` (list)
+- `most_connected_functions` (list)
+- `graph_health` (dict)
+- `recommendations` (list)
+```
+**Interpretation Guideline**: Check `recommendations` to find circular dependencies, high coupling, or unreachable code components.
+
+#### [REPORT] nodes
+**Description**: Full list of discovered nodes.
+```txt
+JSON Keys:
+- `id` (string)
+- `type` (string)
+- `label` (string)
+- `attributes` (dict)
+```
+
+#### [REPORT] edges
+**Description**: Full list of relationships.
+```txt
+JSON Keys:
+- `id` (string)
+- `source` (string)
+- `target` (string)
+- `type` (string)
+- `attributes` (dict)
+```
+
+#### [REPORT] graph_statistics
+**Description**: Graph structure statistics.
+```txt
+JSON Keys:
+- `total_nodes` (int)
+- `total_relationships` (int)
+- `node_types` (dict)
+- `relationship_types` (dict)
+- `average_connections` (float)
+- `maximum_connections` (int)
+- `graph_density` (float)
+- `graph_depth` (int)
+- `connected_components` (int)
+- `disconnected_components` (int)
+```
 
 ---
 

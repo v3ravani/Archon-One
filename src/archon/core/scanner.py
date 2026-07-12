@@ -147,6 +147,10 @@ class RepositoryScanner:
         self.ignored_folders = set(IGNORED_FOLDERS)
         if 'ignore_directories' in rules:
             self.ignored_folders.update(rules['ignore_directories'])
+        # Also always ignore the configured output folder
+        output_folder = self.config.get('general', {}).get('output_folder', 'archon-one')
+        if output_folder:
+            self.ignored_folders.add(output_folder)
             
         # Files ignore patterns
         self.ignored_files_patterns = rules.get('ignore_files', [])

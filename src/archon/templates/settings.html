@@ -310,6 +310,7 @@
             <li class="nav-link" onclick="switchPage('page-ignore', this)">Ignore Rules</li>
             <li class="nav-link" onclick="switchPage('page-thresholds', this)">Thresholds</li>
             <li class="nav-link" onclick="switchPage('page-security', this)">Security</li>
+            <li class="nav-link" onclick="switchPage('page-knowledge-graph', this)">Knowledge Graph</li>
             <li class="nav-link" onclick="switchPage('page-performance', this)">Performance</li>
             <li class="nav-link" onclick="switchPage('page-advanced', this)">Advanced</li>
             <li class="nav-link" onclick="switchPage('page-about', this)">About</li>
@@ -412,6 +413,10 @@
                         <div class="checkbox-group">
                             <input type="checkbox" name="modules.repository_intelligence" id="mod-intel">
                             <label for="mod-intel" class="option-label">Repository Intelligence (Module 05)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="modules.knowledge_graph" id="mod-graph">
+                            <label for="mod-graph" class="option-label">Knowledge Graph (Module 06)</label>
                         </div>
                         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
                         <div class="checkbox-group">
@@ -667,6 +672,45 @@
                     </div>
                 </div>
 
+                <!-- Page: Knowledge Graph -->
+                <div id="page-knowledge-graph" class="page-card">
+                    <div class="section-title">Knowledge Graph Customization</div>
+                    <div class="card">
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="knowledge_graph.include_classes" id="graph-classes">
+                            <label for="graph-classes" class="option-label">Include Class Entities</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="knowledge_graph.include_functions" id="graph-functions">
+                            <label for="graph-functions" class="option-label">Include Function/Method Entities</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="knowledge_graph.include_dependencies" id="graph-deps">
+                            <label for="graph-deps" class="option-label">Include File Dependencies</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="knowledge_graph.include_apis" id="graph-apis">
+                            <label for="graph-apis" class="option-label">Include API Endpoint Entities</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="knowledge_graph.include_database" id="graph-db">
+                            <label for="graph-db" class="option-label">Include Database Object Entities</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="knowledge_graph.include_configurations" id="graph-configs">
+                            <label for="graph-configs" class="option-label">Include Configuration Entities</label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Maximum Relationship Traversal Depth</label>
+                            <input type="number" name="knowledge_graph.max_depth" min="1" required>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Minimum Connections for Node Inclusion</label>
+                            <input type="number" name="knowledge_graph.min_node_connections" min="0" required>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Page 7: Performance -->
                 <div id="page-performance" class="page-card">
                     <div class="section-title">Performance Options</div>
@@ -762,7 +806,7 @@
                     <div class="card">
                         <div class="option-group">
                             <label class="option-label">Archon One Version</label>
-                            <div class="option-desc">v0.1.0</div>
+                            <div class="option-desc">v0.2.0</div>
                         </div>
                         <div class="option-group">
                             <label class="option-label">Python Version</label>

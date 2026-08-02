@@ -355,6 +355,7 @@ class CodeMetricsReporter:
         self._report_09_scan_statistics()
         self._report_10_metadata()
         self._report_11_dependencies()
+        self._report_12_untested_files()
         
         # Generate interactive HTML report
         from archon.core.html_generator import compile_and_write_html_report
@@ -2569,3 +2570,67 @@ class CodeMetricsReporter:
             'estimated_classes': total_classes,
             'estimated_functions': total_functions
         }
+
+    def _report_12_untested_files(self):
+        """12 Untested Files & Test Coverage Gap Analysis"""
+        test_files = []
+        source_files = []
+        
+        for f in self.scanned:
+            rel = f['file'].replace('\\', '/')
+            name = Path(rel).name.lower()
+            parent = str(Path(rel).parent).lower()
+            
+            is_test = ('test' in parent or 'tests' in parent or '__tests__' in parent or 
+                       name.startswith('test_') or name.endswith('_test.py') or 
+                       name.endswith('.test.js') or name.endswith('.spec.ts') or 
+                       name.endswith('_test.go') or name.startswith('test') or
+                       name.endswith('test.rs') or name.endswith('test.java'))
+            
+            if is_test:
+                test_files.append(rel)
+            elif f.get('lang_id') in ('python', 'java', 'c', 'cpp', 'javascript', 'typescript', 'php', 'dart', 'kotlin', 'go', 'rust'):
+                source_files.append(rel)
+                
+        test_bases = {Path(tf).stem.lower().replace('test_', '').replace('_test', '').replace('.test', '').replace('.spec', '') for tf in test_files}
+        
+        untested = []
+        tested = []
+        
+        for sf in source_files:
+            s_stem = Path(sf).stem.lower()
+            if s_stem in test_bases or any(s_stem in tb for tb in test_bases):
+                tested.append(sf)
+            else:
+                loc = next((item.get('logical_loc', 0) for item in self.scanned if item['file'].replace('\\', '/') == sf), 0)
+                risk = 'High' if ('core' in sf.lower() or 'engine' in sf.lower() or 'auth' in sf.lower() or 'security' in sf.lower()) else 'Medium'
+                untested.append({
+                    'file': sf,
+                    'logical_loc': loc,
+                    'risk_level': risk
+                })
+                
+        txt = "=========================================\n"
+        txt += "UNTESTED FILES & COVERAGE GAP ANALYSIS\n"
+        txt += "=========================================\n\n"
+        txt += f"Total Source Files: {len(source_files)}\n"
+        txt += f"Test Files Identified: {len(test_files)}\n"
+        txt += f"Tested Source Files: {len(tested)}\n"
+        txt += f"Untested Source Files: {len(untested)}\n"
+        gap_pct = round((len(untested)/len(source_files)*100), 1) if source_files else 0.0
+        txt += f"Estimated Test Coverage Gap: {gap_pct}%\n\n"
+        
+        rows = [[item['file'], item['logical_loc'], item['risk_level']] for item in untested[:30]]
+        txt += tabulate(rows, headers=["Untested File", "Logical LOC", "Risk Level"], tablefmt="grid")
+        
+        json_data = {
+            "untested_files_summary": {
+                "total_source_files": len(source_files),
+                "test_files_count": len(test_files),
+                "tested_source_files": len(tested),
+                "untested_source_files": len(untested),
+                "coverage_gap_percentage": gap_pct
+            },
+            "untested_files": untested
+        }
+        self._write_files("12_untested_files", txt, json_data)

@@ -165,6 +165,12 @@ class RepositoryScanner:
         # File sizes
         self.max_file_size = rules.get('max_file_size', 10485760)
         
+        # Fast & Incremental scan flags
+        gen_cfg = self.config.get('general', {})
+        perf_cfg = self.config.get('performance', {})
+        self.fast_scan = gen_cfg.get('fast_scan', False) or (perf_cfg.get('scan_mode') == 'fast') or perf_cfg.get('fast_scan', False)
+        self.incremental_scan = gen_cfg.get('incremental_scan', False) or perf_cfg.get('incremental_scan', False) or perf_cfg.get('skip_unchanged_files', False)
+        
         # Scan stats
         self.scan_id = ""
         self.start_time = 0.0
@@ -184,6 +190,32 @@ class RepositoryScanner:
         self.ignored_count = 0
         self.symlink_count = 0
         self.executable_count = 0
+
+    def _load_incremental_cache(self) -> Dict[str, Dict[str, Any]]:
+        if not self.incremental_scan:
+            return {}
+        try:
+            import json
+            output_folder = self.config.get('general', {}).get('output_folder', 'archon-one')
+            out_base = self.root_path / output_folder
+            if not out_base.exists() or not out_base.is_dir():
+                return {}
+            subdirs = [d for d in out_base.iterdir() if d.is_dir()]
+            if not subdirs:
+                return {}
+            latest_dir = sorted(subdirs, key=lambda x: x.stat().st_mtime if x.exists() else 0, reverse=True)[0]
+            cache_file = latest_dir / "01_metrics" / "02_file_metrics.json"
+            if not cache_file.exists():
+                return {}
+            data = json.loads(cache_file.read_text(encoding='utf-8'))
+            cached_map = {}
+            for item in data.get('scanned_files_metrics', []):
+                rel_f = item.get('file')
+                if rel_f:
+                    cached_map[rel_f] = item
+            return cached_map
+        except Exception:
+            return {}
         
     def scan(self, progress_callback=None) -> Dict[str, Any]:
         """
@@ -192,6 +224,7 @@ class RepositoryScanner:
         """
         self.start_time = time.time()
         self.scan_id = str(uuid.uuid4())
+        cached_map = self._load_incremental_cache()
         
         # Phase 1: Collect all files to build total list for progress indication
         file_paths = []
@@ -206,20 +239,35 @@ class RepositoryScanner:
                 
             name = entry_path.name
             rel_path = entry_path.relative_to(self.root_path)
+            rel_str = str(rel_path)
             
             # Universal properties for both scanned and ignored files
             file_size = 0
+            mtime = 0.0
             is_symlink = entry_path.is_symlink()
             read_only = is_read_only(entry_path)
             executable = is_executable(entry_path)
             
             try:
-                # Use lstat for symlinks so we don't follow them if they point elsewhere
-                file_size = entry_path.lstat().st_size
+                st = entry_path.lstat()
+                file_size = st.st_size
+                mtime = st.st_mtime
             except Exception:
                 pass
-                
-            sha256 = compute_sha256(entry_path)
+
+            # Incremental scan check: reuse cached metrics if size and mtime unchanged
+            if self.incremental_scan and rel_str in cached_map:
+                c_item = cached_map[rel_str]
+                if c_item.get('size_bytes') == file_size and abs(c_item.get('mtime', 0.0) - mtime) < 1.0:
+                    self.files_scanned.append(c_item)
+                    continue
+
+            # Fast scan check: lightweight hash signature
+            if self.fast_scan:
+                sha256 = f"fast_{file_size}_{int(mtime)}"
+            else:
+                sha256 = compute_sha256(entry_path)
+
             mime_type = get_mime_type(entry_path)
             
             if is_symlink:
@@ -286,6 +334,7 @@ class RepositoryScanner:
                     'extension': entry_path.suffix.lower(),
                     'directory': str(entry_path.parent.relative_to(self.root_path)) if entry_path.parent != self.root_path else '.',
                     'size_bytes': file_size,
+                    'mtime': mtime,
                     'mime_type': mime_type,
                     'sha256': sha256,
                     'read_only': read_only,

@@ -368,6 +368,13 @@ class CodeAnalysisReporter:
         self._report_08_code_smells()
         self._report_09_maintainability()
         self._report_10_scan_metadata()
+        self._report_11_naming_conventions()
+        self._report_12_recursive_calls()
+        self._report_13_memory_resource_leaks()
+        self._report_14_error_handling_smells()
+        self._report_15_structural_smells()
+        self._report_16_concurrency_thread_safety()
+        self._report_17_dead_code_unused_symbols()
         self._report_01_quality_summary() # summary goes last
         
         # Generate interactive HTML report
@@ -1609,3 +1616,140 @@ class CodeAnalysisReporter:
             "errors_count": len(self.results.get('errors', []))
         }
         self._write_files("10_scan_metadata", txt, json_data)
+
+    def _report_11_naming_conventions(self):
+        naming_items = []
+        for rel_path, analysis in self.file_analyses.items():
+            lang = analysis.get('lang_id')
+            for cls in analysis.get('classes', []):
+                c_name = cls.get('name', '')
+                if c_name and not c_name[0].isupper() and '_' in c_name:
+                    naming_items.append({
+                        "file": rel_path, "line": cls.get('line'), "symbol_type": "Class",
+                        "symbol": c_name, "rule": "Class names should be PascalCase", "severity": "Medium"
+                    })
+            for fn in analysis.get('functions', []):
+                f_name = fn.get('name', '')
+                if lang == 'python' and any(c.isupper() for c in f_name) and not f_name.startswith('__'):
+                    naming_items.append({
+                        "file": rel_path, "line": fn.get('line'), "symbol_type": "Function",
+                        "symbol": f_name, "rule": "Python functions should use snake_case", "severity": "Low"
+                    })
+        txt = "=========================================\nNAMING CONVENTIONS & VIOLATIONS REPORT\n=========================================\n\n"
+        txt += f"Total Naming Violations Found: {len(naming_items)}\n\n"
+        rows = [[item['file'], item['line'], item['symbol_type'], item['symbol'], item['rule']] for item in naming_items]
+        txt += tabulate(rows, headers=["File", "Line", "Symbol Type", "Symbol", "Rule"], tablefmt="grid")
+        self._write_files("11_naming_conventions", txt, {"naming_violations": naming_items})
+
+    def _report_12_recursive_calls(self):
+        rec_items = []
+        for rel_path, analysis in self.file_analyses.items():
+            content = analysis.get('clean_content', '')
+            for fn in analysis.get('functions', []):
+                f_name = fn.get('name', '')
+                if f_name and len(f_name) > 2 and re.search(r'\b' + re.escape(f_name) + r'\s*\(', content):
+                    rec_items.append({
+                        "file": rel_path, "line": fn.get('line'), "function": f_name,
+                        "risk": "Medium (Direct Recursive Call Detected)", "recommendation": "Verify base case termination to prevent stack overflow."
+                    })
+        txt = "=========================================\nRECURSIVE CALLS & CALL DEPTH RISK REPORT\n=========================================\n\n"
+        txt += f"Total Recursive Functions Identified: {len(rec_items)}\n\n"
+        rows = [[item['file'], item['line'], item['function'], item['risk']] for item in rec_items]
+        txt += tabulate(rows, headers=["File", "Line", "Function", "Risk Level"], tablefmt="grid")
+        self._write_files("12_recursive_calls", txt, {"recursive_calls": rec_items})
+
+    def _report_13_memory_resource_leaks(self):
+        mem_items = []
+        for rel_path, analysis in self.file_analyses.items():
+            lines = analysis.get('clean_lines', [])
+            lang = analysis.get('lang_id')
+            for idx, line in enumerate(lines, 1):
+                if lang == 'python' and 'open(' in line and 'with ' not in line:
+                    mem_items.append({
+                        "file": rel_path, "line": idx, "issue": "Unclosed File Resource",
+                        "pattern": line.strip(), "recommendation": "Use 'with open(...) as f:' context manager to ensure immediate file descriptor release."
+                    })
+                elif 'malloc(' in line and 'free(' not in line:
+                    mem_items.append({
+                        "file": rel_path, "line": idx, "issue": "Manual Allocation Without Local Free",
+                        "pattern": line.strip(), "recommendation": "Ensure allocated buffer memory is freed or managed with RAII."
+                    })
+        txt = "=========================================\nMEMORY HEAVY & RESOURCE LEAK AUDIT REPORT\n=========================================\n\n"
+        txt += f"Total Memory & Resource Issues: {len(mem_items)}\n\n"
+        rows = [[item['file'], item['line'], item['issue'], item['recommendation']] for item in mem_items]
+        txt += tabulate(rows, headers=["File", "Line", "Issue Type", "Recommendation"], tablefmt="grid")
+        self._write_files("13_memory_resource_leaks", txt, {"memory_resource_findings": mem_items})
+
+    def _report_14_error_handling_smells(self):
+        err_items = []
+        for rel_path, analysis in self.file_analyses.items():
+            lines = analysis.get('clean_lines', [])
+            for idx, line in enumerate(lines, 1):
+                stripped = line.strip()
+                if stripped.startswith('except:') or stripped.startswith('except Exception:') or 'catch (e) {}' in stripped or 'catch(e){}' in stripped:
+                    err_items.append({
+                        "file": rel_path, "line": idx, "smell": "Bare / Swallowed Exception Handler",
+                        "line_content": stripped, "recommendation": "Do not swallow exceptions silently. Log or handle caught errors explicitly."
+                    })
+        txt = "=========================================\nERROR HANDLING & EXCEPTION SWALLOWING REPORT\n=========================================\n\n"
+        txt += f"Total Error Handling Smells: {len(err_items)}\n\n"
+        rows = [[item['file'], item['line'], item['smell'], item['line_content']] for item in err_items]
+        txt += tabulate(rows, headers=["File", "Line", "Smell Type", "Line Content"], tablefmt="grid")
+        self._write_files("14_error_handling_smells", txt, {"error_handling_smells": err_items})
+
+    def _report_15_structural_smells(self):
+        struct_items = []
+        for rel_path, analysis in self.file_analyses.items():
+            for fn in analysis.get('functions', []):
+                if fn.get('loc', 0) > 100:
+                    struct_items.append({
+                        "file": rel_path, "line": fn.get('line'), "symbol": fn.get('name'),
+                        "smell": "God Function / Method", "metric": f"{fn.get('loc')} LOC", "recommendation": "Refactor method into smaller cohesive functions."
+                    })
+            for cls in analysis.get('classes', []):
+                if cls.get('loc', 0) > 500:
+                    struct_items.append({
+                        "file": rel_path, "line": cls.get('line'), "symbol": cls.get('name'),
+                        "smell": "Large Class / God Object", "metric": f"{cls.get('loc')} LOC", "recommendation": "Split class responsibilities using Single Responsibility Principle (SRP)."
+                    })
+        txt = "=========================================\nSTRUCTURAL & OBJECT-ORIENTED SMELL REPORT\n=========================================\n\n"
+        txt += f"Total Structural Smells: {len(struct_items)}\n\n"
+        rows = [[item['file'], item['line'], item['symbol'], item['smell'], item['metric']] for item in struct_items]
+        txt += tabulate(rows, headers=["File", "Line", "Symbol", "Smell Type", "Metric"], tablefmt="grid")
+        self._write_files("15_structural_smells", txt, {"structural_smells": struct_items})
+
+    def _report_16_concurrency_thread_safety(self):
+        conc_items = []
+        for rel_path, analysis in self.file_analyses.items():
+            lines = analysis.get('clean_lines', [])
+            for idx, line in enumerate(lines, 1):
+                stripped = line.strip()
+                if 'lock.acquire()' in stripped and 'finally' not in analysis.get('clean_content', ''):
+                    conc_items.append({
+                        "file": rel_path, "line": idx, "risk": "Unprotected Lock Acquisition",
+                        "recommendation": "Use context manager ('with lock:') or try-finally block to guarantee lock release."
+                    })
+                elif 'global ' in stripped and any(kw in stripped for kw in ('count', 'data', 'cache', 'state')):
+                    conc_items.append({
+                        "file": rel_path, "line": idx, "risk": "Global State Mutation in Concurrency Scope",
+                        "recommendation": "Avoid raw global state mutations across concurrent worker threads."
+                    })
+        txt = "=========================================\nCONCURRENCY & THREAD SAFETY RISK REPORT\n=========================================\n\n"
+        txt += f"Total Concurrency Risks Found: {len(conc_items)}\n\n"
+        rows = [[item['file'], item['line'], item['risk'], item['recommendation']] for item in conc_items]
+        txt += tabulate(rows, headers=["File", "Line", "Risk Description", "Recommendation"], tablefmt="grid")
+        self._write_files("16_concurrency_thread_safety", txt, {"concurrency_risks": conc_items})
+
+    def _report_17_dead_code_unused_symbols(self):
+        dead_items = []
+        for f in self.unused_internal_modules:
+            dead_items.append({
+                "type": "Unused Internal Module",
+                "symbol": f,
+                "recommendation": "Module is never imported across codebase. Consider deleting if unreferenced."
+            })
+        txt = "=========================================\nDEAD CODE & UNUSED SYMBOLS REPORT\n=========================================\n\n"
+        txt += f"Total Unused Symbols/Modules: {len(dead_items)}\n\n"
+        rows = [[item['type'], item['symbol'], item['recommendation']] for item in dead_items]
+        txt += tabulate(rows, headers=["Symbol Type", "Module/Symbol Path", "Recommendation"], tablefmt="grid")
+        self._write_files("17_dead_code_unused_symbols", txt, {"dead_code_findings": dead_items})

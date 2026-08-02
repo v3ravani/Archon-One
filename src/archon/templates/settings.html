@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Archon One Settings Manager</title>
+    <title>Archon One Settings & Intelligence Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         :root {
             --bg-color: #FFFFFF;
-            --card-color: #F8F9FA;
-            --text-color: #212529;
-            --primary-btn: #212529;
-            --primary-btn-hover: #000000;
-            --secondary-btn: #FFFFFF;
-            --border-color: #DEE2E6;
-            --critical-color: #E53935;
-            --warning-color: #FB8C00;
-            --success-color: #4CAF50;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --card-bg: #FFFFFF;
+            --sidebar-bg: #F8FAFC;
+            --text-color: #0F172A;
+            --text-secondary: #64748B;
+            --primary-btn: #0F172A;
+            --primary-btn-hover: #1E293B;
+            --secondary-btn: #F1F5F9;
+            --secondary-btn-hover: #E2E8F0;
+            --border-color: #E2E8F0;
+            --critical-color: #DC2626;
+            --warning-color: #D97706;
+            --success-color: #16A34A;
+            --accent-color: #2563EB;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         * {
@@ -31,67 +39,75 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+            letter-spacing: -0.01em;
         }
 
         /* Sidebar styling */
         .sidebar {
-            width: 250px;
+            width: 260px;
+            min-width: 260px;
+            flex-shrink: 0;
             border-right: 1px solid var(--border-color);
-            background-color: var(--card-color);
+            background-color: var(--sidebar-bg);
             display: flex;
             flex-direction: column;
-            padding: 20px 0;
+            padding: 24px 12px;
         }
 
         .sidebar-brand {
-            font-size: 1.25rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px 0 20px 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: left;
+            padding: 4px 16px 20px 16px;
+            color: var(--text-color);
             border-bottom: 1px solid var(--border-color);
         }
 
         .search-container {
-            padding: 15px;
+            padding: 16px 12px;
         }
 
         .search-input {
             width: 100%;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 0.875rem;
+            background-color: #FFFFFF;
+            color: var(--text-color);
         }
 
         .nav-links {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding: 10px;
+            gap: 6px;
+            padding: 8px;
             overflow-y: auto;
             flex-grow: 1;
         }
 
         .nav-link {
             display: block;
-            padding: 10px 15px;
+            padding: 10px 16px;
             text-decoration: none;
-            color: var(--text-color);
-            border-radius: 6px;
+            color: var(--text-secondary);
+            border-radius: 8px;
             font-weight: 500;
-            font-size: 0.9375rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.15s ease;
         }
 
         .nav-link:hover {
-            background-color: var(--border-color);
+            background-color: var(--secondary-btn-hover);
+            color: var(--text-color);
         }
 
         .nav-link.active {
             background-color: var(--primary-btn);
-            color: var(--bg-color);
+            color: #FFFFFF;
+            font-weight: 600;
         }
 
         /* Main content layout */
@@ -101,41 +117,66 @@
             flex-direction: column;
             height: 100%;
             position: relative;
+            background-color: #FFFFFF;
         }
 
         /* Sticky Header */
         .header {
-            height: 70px;
+            height: 72px;
+            min-height: 72px;
+            flex-shrink: 0;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
-            background-color: var(--bg-color);
-            z-index: 10;
+            padding: 0 36px;
+            background-color: #FFFFFF;
+            z-index: 100;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            width: 100%;
         }
 
         .header-title {
-            font-size: 1.15rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
         }
 
         .header-buttons {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+            flex-shrink: 0;
         }
 
-        /* Scrollable Options */
+        .header-buttons .btn {
+            height: 38px;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Scrollable Options Content */
         .content {
             flex-grow: 1;
-            padding: 30px;
+            padding: 36px 40px 60px 40px;
             overflow-y: auto;
+            background-color: #FFFFFF;
         }
 
         .page-card {
             display: none;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
         .page-card.active {
@@ -143,119 +184,145 @@
         }
 
         .section-title {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 700;
-            border-bottom: 2px solid var(--primary-btn);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+            margin-bottom: 8px;
         }
 
         /* Option layout */
         .card {
-            background-color: var(--card-color);
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
         .option-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .option-label {
             font-weight: 600;
-            font-size: 0.9375rem;
+            font-size: 0.925rem;
+            color: var(--text-color);
         }
 
         .option-desc {
-            font-size: 0.8125rem;
-            color: var(--text-color);
-            opacity: 0.75;
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
         }
 
         /* Input Controls */
-        input[type="text"], input[type="number"], select, textarea {
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        select,
+        textarea {
             width: 100%;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9375rem;
-            background-color: var(--bg-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background-color: #FFFFFF;
             color: var(--text-color);
+            transition: all 0.15s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
+            accent-color: var(--primary-btn);
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 4px 0;
         }
 
         /* Buttons */
         .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.9375rem;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: opacity 0.2s;
-        }
-
-        .btn:hover {
-            opacity: 0.85;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-primary {
             background-color: var(--primary-btn);
-            color: var(--bg-color);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-btn-hover);
         }
 
         .btn-secondary {
             background-color: var(--secondary-btn);
-            color: var(--primary-btn);
-            border: 1px solid var(--primary-btn);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-btn-hover);
         }
 
         .btn-critical {
-            background-color: var(--critical-color);
-            color: var(--bg-color);
+            background-color: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FCA5A5;
         }
 
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-            margin-left: 5px;
-            font-size: 0.8rem;
-            background-color: var(--border-color);
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            text-align: center;
-            line-height: 16px;
+        .btn-critical:hover {
+            background-color: #FEE2E2;
         }
 
-        /* Status bar Footer */
-        .footer {
-            height: 40px;
-            border-top: 1px solid var(--border-color);
-            background-color: var(--card-color);
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Status indicator */
+        .header-status {
+            background-color: var(--sidebar-bg);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 36px;
             font-size: 0.8125rem;
         }
 
@@ -291,11 +358,39 @@
             font-weight: bold;
             z-index: 100;
             display: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
+
 <body>
+
+    <!-- Global Loading Overlay -->
+    <div id="global-loading-overlay"
+        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #FFFFFF;">
+        <div
+            style="width: 42px; height: 42px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: #FFFFFF; border-radius: 50%; animation: spin 0.8s linear infinite;">
+        </div>
+        <div id="global-loading-msg" style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em;">Processing...
+        </div>
+    </div>
+
+    <!-- Floating Info/Alert Popup Modal -->
+    <div id="info-modal"
+        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(3px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px;">
+        <div
+            style="background: #FFFFFF; border-radius: 12px; padding: 28px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 1px solid #E2E8F0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div id="info-modal-icon"
+                style="width: 52px; height: 52px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: bold;">
+                ✓</div>
+            <div id="info-modal-title" style="font-size: 1.2rem; font-weight: 700; color: #0F172A;">Notification</div>
+            <div id="info-modal-body" style="font-size: 0.9rem; color: #64748B; line-height: 1.5;">Message goes here...
+            </div>
+            <button type="button" class="btn btn-primary"
+                style="width: 100%; padding: 10px; margin-top: 8px; justify-content: center;"
+                onclick="closeInfoModal()">OK</button>
+        </div>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -306,12 +401,16 @@
         <ul class="nav-links">
             <li class="nav-link active" onclick="switchPage('page-general', this)">General</li>
             <li class="nav-link" onclick="switchPage('page-modules', this)">Scan Modules</li>
-            <li class="nav-link" onclick="switchPage('page-output', this)">Output</li>
+            <li class="nav-link" onclick="switchPage('page-feature-guide', this)">Feature Documentation</li>
+            <li class="nav-link" onclick="switchPage('page-reports', this)">Reports & History</li>
+            <li class="nav-link" onclick="switchPage('page-knowledge-graph', this)">Knowledge Graph</li>
+            <li class="nav-link" onclick="switchPage('page-vault', this)">Secret Vault</li>
+            <li class="nav-link" onclick="switchPage('page-profiles', this)">Command Profiles</li>
+            <li class="nav-link" onclick="switchPage('page-cli-help', this)">CLI Commands Guide</li>
+            <li class="nav-link" onclick="switchPage('page-output', this)">Output Options</li>
             <li class="nav-link" onclick="switchPage('page-ignore', this)">Ignore Rules</li>
             <li class="nav-link" onclick="switchPage('page-thresholds', this)">Thresholds</li>
-            <li class="nav-link" onclick="switchPage('page-security', this)">Security</li>
-            <li class="nav-link" onclick="switchPage('page-knowledge-graph', this)">Knowledge Graph</li>
-            <li class="nav-link" onclick="switchPage('page-diagrams', this)">Architecture Diagrams</li>
+            <li class="nav-link" onclick="switchPage('page-security', this)">Security Rules</li>
             <li class="nav-link" onclick="switchPage('page-performance', this)">Performance</li>
             <li class="nav-link" onclick="switchPage('page-advanced', this)">Advanced</li>
             <li class="nav-link" onclick="switchPage('page-about', this)">About</li>
@@ -323,33 +422,35 @@
         <!-- Notification toast -->
         <div id="toast" class="notification-toast"></div>
 
-        <!-- Sticky Header -->
+        <!-- Sticky Header Bar -->
         <div class="header">
-            <div class="header-title" id="project-header">Project Settings</div>
+            <div class="header-title" id="project-header">General Settings</div>
             <div class="header-buttons">
-                <button class="btn btn-secondary" onclick="exportConfig()">Export Config</button>
-                <button class="btn btn-secondary" onclick="triggerImport()">Import Config</button>
+                <button type="button" class="btn btn-secondary" onclick="exportConfig()">Export Config</button>
+                <button type="button" class="btn btn-secondary" onclick="triggerImport()">Import Config</button>
                 <input type="file" id="import-file" style="display:none" onchange="importConfig(event)">
-                <button class="btn btn-secondary" onclick="resetPage()">Reset Page</button>
-                <button class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
-                <button class="btn btn-critical" onclick="shutdownServer()">Shutdown Server</button>
+                <button type="button" class="btn btn-secondary" onclick="resetPage()">Reset Defaults</button>
+                <button type="button" class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
+                <button type="button" class="btn btn-critical" onclick="shutdownServer()">Shutdown Server</button>
             </div>
         </div>
 
         <!-- Content Area -->
         <div class="content">
             <form id="config-form" oninput="markDirty()">
-                
+
                 <!-- Page 1: General -->
                 <div id="page-general" class="page-card active">
                     <div class="section-title">General Settings</div>
                     <div class="card">
                         <div class="option-group">
-                            <label class="option-label">Project Name <span class="tooltip" title="Give your repository scan configuration a friendly name">?</span></label>
+                            <label class="option-label">Project Name <span class="tooltip"
+                                    title="Give your repository scan configuration a friendly name">?</span></label>
                             <input type="text" name="general.project_name" required>
                         </div>
                         <div class="option-group">
-                            <label class="option-label">Output Folder <span class="tooltip" title="Directory path to save reports. Supports relative folder names or full absolute paths (e.g., C:\\reports).">?</span></label>
+                            <label class="option-label">Output Folder <span class="tooltip"
+                                    title="Directory path to save reports. Supports relative folder names or full absolute paths (e.g., C:\\reports).">?</span></label>
                             <input type="text" name="general.output_folder" required>
                             <div class="option-desc">Relative to repository root, or enter an absolute path.</div>
                         </div>
@@ -431,6 +532,337 @@
                     </div>
                 </div>
 
+                <!-- Page: Feature Documentation & Calculation Mechanics -->
+                <div id="page-feature-guide" class="page-card">
+                    <div class="section-title">Feature Documentation & Calculation Mechanics</div>
+
+                    <!-- Intro Banner -->
+                    <div class="card"
+                        style="margin-bottom: 24px; border-left: 4px solid var(--primary-color); background: #F8FAFC;">
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #0F172A; margin-bottom: 6px;">Archon
+                            One Engineering Reference & Analysis Manual</div>
+                        <div style="font-size: 0.9rem; color: #475569; line-height: 1.6;">
+                            This comprehensive guide documents all 18 core static analysis modules, metric algorithms,
+                            security checkers, mathematical formulas, and architectural intelligence rules implemented
+                            inside Archon One. Scroll down to review each analysis section in full detail.
+                        </div>
+                    </div>
+
+                    <!-- 01. Cyclomatic Complexity & Cognitive Complexity -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">01.
+                            Cyclomatic Complexity & Cognitive Complexity</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            <strong>Cyclomatic Complexity (CC)</strong> measures the quantitative count of linearly
+                            independent control-flow paths through a program's source code. It represents the structural
+                            branching complexity and determines the minimum number of unit test cases required to
+                            achieve 100% decision branch coverage.
+                            <br><br>
+                            <strong>Cognitive Complexity (COG)</strong> assesses how difficult code is for human
+                            developers to comprehend and maintain. Unlike Cyclomatic Complexity, Cognitive Complexity
+                            does not increment for simple multi-condition structures, but heavily penalizes nested
+                            control structures, recursion, and breaks in linear reading flow.
+                        </p>
+                        <div
+                            style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-family: monospace; color: #0284C7; font-weight: 700; line-height: 1.5;">
+                            Cyclomatic Complexity (CC) = E - N + 2P = 1 + Total_Decision_Points<br>
+                            Cognitive Complexity (COG) = ∑ ( Nesting_Level_Weight + Decision_Increment )
+                        </div>
+                        <div style="font-weight: 700; color: #0F172A; margin-bottom: 6px;">Calculation Steps in Archon
+                            One:</div>
+                        <ul
+                            style="margin-left: 20px; font-size: 0.9rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            <li><strong>Base Value:</strong> Starts at <code>CC = 1</code> for every analyzed file and
+                                function scope.</li>
+                            <li><strong>Decision Point Increments (+1 CC):</strong> Evaluates AST nodes and regex
+                                pattern rules for decision keywords: <code>if</code>, <code>elif</code>,
+                                <code>else if</code>, <code>for</code>, <code>while</code>, <code>do</code>,
+                                <code>catch</code>, <code>case</code>, ternary <code>?</code>, and logical operators
+                                (<code>&&</code>, <code>||</code>, <code>and</code>, <code>or</code>).</li>
+                            <li><strong>Cognitive Nesting Weight:</strong> Increments Cognitive Complexity by
+                                <code>1</code> for each control flow statement, plus an additional <code>+1</code> for
+                                each level of enclosing nesting depth (e.g., an <code>if</code> statement inside 2
+                                nested loops receives a cognitive weight of <code>1 + 2 = 3</code>).</li>
+                        </ul>
+                        <table
+                            style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; margin-top: 10px;">
+                            <thead>
+                                <tr style="background: #F1F5F9; border-bottom: 2px solid #E2E8F0;">
+                                    <th style="padding: 10px;">CC Score Range</th>
+                                    <th style="padding: 10px;">Risk Classification</th>
+                                    <th style="padding: 10px;">Maintainability Impact</th>
+                                    <th style="padding: 10px;">Recommended Engineering Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #E2E8F0;">
+                                    <td style="padding: 10px; font-weight: 700; color: #16A34A;">1 - 10</td>
+                                    <td style="padding: 10px;">Low Risk</td>
+                                    <td style="padding: 10px;">Simple, clean, highly testable code</td>
+                                    <td style="padding: 10px;">None required (Ideal state)</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #E2E8F0;">
+                                    <td style="padding: 10px; font-weight: 700; color: #D97706;">11 - 20</td>
+                                    <td style="padding: 10px;">Moderate Risk</td>
+                                    <td style="padding: 10px;">Moderate complexity, requires test coverage</td>
+                                    <td style="padding: 10px;">Monitor complex methods</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #E2E8F0;">
+                                    <td style="padding: 10px; font-weight: 700; color: #DC2626;">21 - 50</td>
+                                    <td style="padding: 10px;">High Risk</td>
+                                    <td style="padding: 10px;">Complex code, high defect probability</td>
+                                    <td style="padding: 10px;">Refactor into smaller helper functions</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; font-weight: 700; color: #7F1D1D;">50+</td>
+                                    <td style="padding: 10px;">Critical Risk</td>
+                                    <td style="padding: 10px;">Untestable, fragile "God Method"</td>
+                                    <td style="padding: 10px;">Urgent modular refactoring mandatory</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 02. Maintainability Index (MI) & Technical Debt Score -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">02.
+                            Maintainability Index (MI) & Technical Debt Score</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            The <strong>Maintainability Index (MI)</strong> is an SEI (Software Engineering Institute)
+                            standard composite metric that quantifies the relative maintainability of source code files
+                            on a 0 to 100 scale.
+                            <br><br>
+                            <strong>Technical Debt Score</strong> estimates the accumulated remediation work required to
+                            resolve code smells, architectural flaws, and security findings across the codebase.
+                        </p>
+                        <div
+                            style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-family: monospace; color: #059669; font-weight: 700; line-height: 1.5;">
+                            MI = MAX(0, (171 - 5.2 * ln(Halstead_Volume) - 0.23 * Cyclomatic_Complexity - 16.2 *
+                            ln(Logical_LOC) + 50 * sin(sqrt(2.4 * Comment_Density_Pct))) * 100 / 171)<br><br>
+                            Technical Debt Score = 100 - MI + (Code_Smells * 2.5) + (Security_Findings * 5.0)
+                        </div>
+                        <div style="font-weight: 700; color: #0F172A; margin-bottom: 6px;">Maintainability Grading
+                            System:</div>
+                        <ul
+                            style="margin-left: 20px; font-size: 0.9rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            <li><strong>Grade A (MI ≥ 80):</strong> Highly maintainable, excellent modular structure,
+                                minimal debt.</li>
+                            <li><strong>Grade B (65 ≤ MI < 80):</strong> Good maintainability, minor refactoring
+                                        recommended.</li>
+                            <li><strong>Grade C (50 ≤ MI < 65):</strong> Moderate maintainability, moderate code smells
+                                        present.</li>
+                            <li><strong>Grade D (20 ≤ MI < 50):</strong> Low maintainability, elevated bug risk during
+                                        modifications.</li>
+                            <li><strong>Grade F (MI < 20):</strong> Critical technical debt, requires comprehensive
+                                        architecture overhaul.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 03. Fast Scan Mode & Incremental Hashing Engine -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">03. Fast
+                            Scan Mode & Incremental Hashing Engine</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Archon One implements a high-performance file signature fingerprinting engine designed for
+                            sub-second incremental scans on large repositories.
+                        </p>
+                        <div
+                            style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-family: monospace; color: #D97706; font-weight: 700;">
+                            File_Signature = MD5( Relative_Path + ":" + File_Size_Bytes + ":" + Last_Modified_Timestamp
+                            )
+                        </div>
+                        <div style="font-weight: 700; color: #0F172A; margin-bottom: 6px;">Execution Modes:</div>
+                        <ul style="margin-left: 20px; font-size: 0.9rem; color: #334155; line-height: 1.6;">
+                            <li><strong>Fast Scan Mode:</strong> Utilizes multi-threaded regex line parsing to skip
+                                heavy full AST parsing for unchanged non-critical files, reducing scan times by up to
+                                90%.</li>
+                            <li><strong>Incremental Scan Mode:</strong> Checks file signatures against
+                                <code>.archon_cache.json</code>. If the fingerprint matches, cached metrics and security
+                                results are re-used instantly.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 04. Untested Files & Coverage Gap Analysis -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">04.
+                            Untested Files & Coverage Gap Analysis</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Cross-references source implementation files against test files across Python, Java, Go,
+                            Rust, TypeScript, C++, Kotlin, and PHP.
+                        </p>
+                        <div
+                            style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-family: monospace; color: #7C3AED; font-weight: 700;">
+                            Coverage_Gap_Percentage = ( Untested_Source_Files / Total_Source_Files ) * 100
+                        </div>
+                        <div style="font-weight: 700; color: #0F172A; margin-bottom: 6px;">Pattern Matching Rules:</div>
+                        <ul style="margin-left: 20px; font-size: 0.9rem; color: #334155; line-height: 1.6;">
+                            <li><strong>Test Folders:</strong> <code>/tests/</code>, <code>/__tests__/</code>,
+                                <code>/test/</code>.</li>
+                            <li><strong>Test Files:</strong> <code>test_*.py</code>, <code>*_test.go</code>,
+                                <code>*.test.js</code>, <code>*.spec.ts</code>, <code>Test*.java</code>,
+                                <code>*.test.rs</code>.</li>
+                            <li><strong>Risk Scoring:</strong> Assigns High Risk to untested files located inside
+                                <code>core/</code>, <code>security/</code>, <code>auth/</code>, or <code>engine/</code>
+                                modules.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 05. Naming Conventions & Code Style Enforcement -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">05.
+                            Naming Conventions & Code Style Enforcement</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Parses AST declaration nodes to verify symbol compliance against language standards.
+                        </p>
+                        <ul style="margin-left: 20px; font-size: 0.9rem; color: #334155; line-height: 1.6;">
+                            <li><strong>Class Declarations:</strong> Validates <code>PascalCase</code> (e.g.,
+                                <code>UserManager</code>). Snake-case class names like <code>user_manager</code> are
+                                flagged as Medium severity violations.</li>
+                            <li><strong>Function & Method Declarations:</strong> Validates <code>snake_case</code> for
+                                Python/Rust and <code>camelCase</code> for JavaScript/Java/Go.</li>
+                            <li><strong>Constants:</strong> Global variables in uppercase must match
+                                <code>UPPER_CASE</code> (e.g., <code>MAX_RETRY_COUNT</code>).</li>
+                        </ul>
+                    </div>
+
+                    <!-- 06. Recursive Calls & Call Depth Risk -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">06.
+                            Recursive Calls & Call Depth Risk</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Analyzes function body call-graphs for self-invocations ($f(x) \to f(x-1)$) and mutual
+                            recursive loops ($A \to B \to A$), evaluating base case guard statements to prevent call
+                            stack overflow crashes.
+                        </p>
+                    </div>
+
+                    <!-- 07. Memory Heavy & Resource Allocation Auditor -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">07.
+                            Memory Heavy & Resource Allocation Auditor</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Detects unclosed file descriptors (e.g., <code>open()</code> calls lacking <code>with</code>
+                            context managers), <code>malloc()</code> allocations without <code>free()</code>, and
+                            unclosed database connection pools.
+                        </p>
+                    </div>
+
+                    <!-- 08. SQL Injection & Dynamic Query Auditor -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">08. SQL
+                            Injection & Dynamic Query Auditor</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Identifies raw string formatting (`f"SELECT ... {var}"`, `%s`, `+ input`, `${id}`) inside
+                            database query execution contexts (`cursor.execute`, `db.query`), flagging High severity SQL
+                            injection risks.
+                        </p>
+                    </div>
+
+                    <!-- 09. Network & Infrastructure Security Smells -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">09.
+                            Network & Infrastructure Security Smells</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Scans configuration files and socket binds for global exposure (`0.0.0.0`), unencrypted HTTP
+                            endpoints, and disabled SSL/TLS certificate verification (`verify=False`,
+                            `InsecureSkipVerify: true`).
+                        </p>
+                    </div>
+
+                    <!-- 10. API Contract & Endpoint Security Risks -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">10. API
+                            Contract & Endpoint Security Risks</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Inspects web API route definitions for CORS wildcard headers (`Access-Control-Allow-Origin:
+                            *`), missing authentication decorators, and exposed internal debug endpoints.
+                        </p>
+                    </div>
+
+                    <!-- 11. Error Handling & Exception Swallowing Smells -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">11.
+                            Error Handling & Exception Swallowing Smells</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Identifies bare `except: pass`, empty `catch (e) {}` blocks, ignored error return values in
+                            Go, and unhandled promise rejections.
+                        </p>
+                    </div>
+
+                    <!-- 12. Concurrency & Thread Safety Analyzer -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">12.
+                            Concurrency & Thread Safety Analyzer</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Detects thread lock acquisitions missing `finally` or context manager releases, blocking
+                            synchronous I/O inside `async def` routines, and raw global state mutations.
+                        </p>
+                    </div>
+
+                    <!-- 13. Structural & Object-Oriented Smell Analyzer -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">13.
+                            Structural & Object-Oriented Smell Analyzer</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Flags God Methods (> 100 LOC), Large Classes (> 500 LOC), Deep Inheritance Trees (depth >
+                            3), and Long Parameter Lists (> 5 parameters).
+                        </p>
+                    </div>
+
+                    <!-- 14. Secret Vault (AES-256-GCM Protection) -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">14.
+                            Secret Vault (AES-256-GCM Protection)</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Uses `scrypt(N=32768, r=8, p=1)` to derive a 256-bit encryption key from a master password.
+                            Encrypts sensitive workspace files with AES-256-GCM generating 12-byte IVs and 16-byte
+                            authentication tags.
+                        </p>
+                    </div>
+
+                    <!-- 15. Interactive Knowledge Graph Canvas -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">15.
+                            Interactive Knowledge Graph Canvas</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Constructs a multi-tiered graph schema with nodes (Repository, Folder, File, Class,
+                            Function, API, DB, Package) and directed edges (`CONTAINS`, `IMPORTS`, `CALLS`, `EXTENDS`,
+                            `EXPOSES`).
+                        </p>
+                    </div>
+
+                    <!-- 16. Dynamic Architecture Diagram Generators -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">16.
+                            Dynamic Architecture Diagram Generators</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Parses codebase AST, imports, class hierarchies, and database calls to dynamically generate
+                            14 Mermaid (`.mmd`) and PlantUML (`.puml`) architecture diagrams.
+                        </p>
+                    </div>
+
+                    <!-- 17. Dependency Graph & Circular Reference Finder -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">17.
+                            Dependency Graph & Circular Reference Finder</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Builds an adjacency matrix $G=(V,E)$ of module imports and runs Tarjan's Strongly Connected
+                            Components (SCC) algorithm to detect circular import chains ($A \to B \to C \to A$).
+                        </p>
+                    </div>
+
+                    <!-- 18. Code Duplication & Token Hashing Algorithm -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 10px;">18. Code
+                            Duplication & Token Hashing Algorithm</div>
+                        <p style="font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 14px;">
+                            Tokenizes source code, strips comments and whitespace, and applies a sliding window MD5 hash
+                            across line sequences ($W \ge 5$) to detect duplicate code blocks across files.
+                        </p>
+                    </div>
+
+                </div>
+
                 <!-- Page 3: Output -->
                 <div id="page-output" class="page-card">
                     <div class="section-title">Output Configuration</div>
@@ -504,7 +936,8 @@
                             <label for="ignore-hidden-files" class="option-label">Ignore Hidden Files</label>
                         </div>
                         <div class="checkbox-group">
-                            <input type="checkbox" name="ignore_rules.ignore_hidden_directories" id="ignore-hidden-dirs">
+                            <input type="checkbox" name="ignore_rules.ignore_hidden_directories"
+                                id="ignore-hidden-dirs">
                             <label for="ignore-hidden-dirs" class="option-label">Ignore Hidden Directories</label>
                         </div>
                         <div class="checkbox-group">
@@ -584,7 +1017,8 @@
                         </div>
                         <div class="option-group">
                             <label class="option-label">Maximum Duplicate Percentage</label>
-                            <input type="number" name="thresholds.max_duplicate_percentage" min="0" max="100" step="0.1" required>
+                            <input type="number" name="thresholds.max_duplicate_percentage" min="0" max="100" step="0.1"
+                                required>
                         </div>
                         <div class="option-group">
                             <label class="option-label">Maximum Duplicate Lines</label>
@@ -592,7 +1026,8 @@
                         </div>
                         <div class="option-group">
                             <label class="option-label">Minimum Comment Density (%)</label>
-                            <input type="number" name="thresholds.min_comment_density" min="0" max="100" step="0.1" required>
+                            <input type="number" name="thresholds.min_comment_density" min="0" max="100" step="0.1"
+                                required>
                         </div>
                         <div class="option-group">
                             <label class="option-label">Minimum Maintainability Score</label>
@@ -675,12 +1110,166 @@
                             <label for="sec-ignore-ex" class="option-label">Ignore Example Secrets</label>
                         </div>
                     </div>
+
+                    <!-- Secret Vault Management Card -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="option-group">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <div class="option-label"
+                                        style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                        Secret Vault (AES-256-GCM Protection)
+                                        <span id="vault-status-badge"
+                                            style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: var(--warning-color); color: #fff;">Checking...</span>
+                                    </div>
+                                    <div class="option-desc">Encrypt sensitive workspace files (such as
+                                        <code>.env</code>, <code>credentials.json</code>, <code>*.pem</code>) using
+                                        AES-256-GCM with scrypt key derivation.</div>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="openVaultPasswordModal()">Set / Change Password</button>
+                                    <button type="button" class="btn btn-primary" onclick="openVaultMaskModal()">+
+                                        Protect Files</button>
+                                </div>
+                            </div>
+
+                            <!-- Protected Files Table -->
+                            <div id="vault-files-container" style="margin-top: 15px;">
+                                <!-- Filled dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Reports & History -->
+                <div id="page-reports" class="page-card">
+                    <div class="section-title">Empirical Reports & Scan History</div>
+
+                    <!-- History List Card -->
+                    <div class="card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                            <div>
+                                <div class="option-label" style="font-size: 1.1rem;">Repository Scan Reports History
+                                </div>
+                                <div class="option-desc">Manage past repository scans and launch full unified
+                                    interactive HTML reports in a new tab.</div>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <button type="button" class="btn btn-secondary"
+                                    style="padding: 6px 14px; font-size: 0.85rem;"
+                                    onclick="loadReportsHistory()">Refresh History</button>
+                            </div>
+                        </div>
+
+                        <div id="reports-history-container">
+                            <!-- Filled dynamically by JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Page: Knowledge Graph -->
                 <div id="page-knowledge-graph" class="page-card">
-                    <div class="section-title">Knowledge Graph Customization</div>
-                    <div class="card">
+                    <div class="section-title">Interactive Knowledge Graph Canvas</div>
+                    <div class="card" style="padding: 15px;">
+                        <!-- Graph Toolbar -->
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; background: #F8FAFC; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <!-- Node Filters -->
+                            <div
+                                style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.85rem;">
+                                <span style="font-weight: 600; color: var(--text-secondary);">Node Filters:</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="checkbox" id="kg-filter-file" checked onchange="filterGraphNodes()">
+                                    <span style="color: #0284C7; font-weight: 600;">● Files</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="checkbox" id="kg-filter-class" checked onchange="filterGraphNodes()">
+                                    <span style="color: #16A34A; font-weight: 600;">● Classes</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="checkbox" id="kg-filter-func" checked onchange="filterGraphNodes()">
+                                    <span style="color: #D97706; font-weight: 600;">● Functions</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="checkbox" id="kg-filter-api" checked onchange="filterGraphNodes()">
+                                    <span style="color: #E11D48; font-weight: 600;">● APIs</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="checkbox" id="kg-filter-db" checked onchange="filterGraphNodes()">
+                                    <span style="color: #4F46E5; font-weight: 600;">● Database</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="checkbox" id="kg-filter-dep" checked onchange="filterGraphNodes()">
+                                    <span style="color: #0D9488; font-weight: 600;">● Packages</span>
+                                </label>
+                            </div>
+
+                            <!-- Actions -->
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="text" id="kg-search" placeholder="Search nodes..."
+                                    oninput="searchGraphNodes()"
+                                    style="padding: 4px 10px; font-size: 0.85rem; width: 160px; border-radius: 6px; background: #FFFFFF; border: 1px solid var(--border-color); color: var(--text-color);">
+                                <button type="button" class="btn btn-secondary"
+                                    style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetGraphView()">Center
+                                    View</button>
+                                <button type="button" class="btn btn-primary"
+                                    style="padding: 4px 10px; font-size: 0.8rem;" onclick="loadGraphData()">Reload
+                                    Graph</button>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Container -->
+                        <div id="kg-canvas-container"
+                            style="width: 100%; height: 500px; background: #FAFAFA; border: 1px solid var(--border-color); border-radius: 8px; position: relative; overflow: hidden;">
+                            <div id="kg-loading-overlay"
+                                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.95); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px;">
+                                <div
+                                    style="width: 38px; height: 38px; border: 3.5px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 0.8s linear infinite;">
+                                </div>
+                                <div style="font-weight: 700; font-size: 1.05rem; color: #0F172A;" id="kg-status-title">
+                                    Loading Knowledge Graph...</div>
+                                <div style="font-size: 0.825rem; color: #64748B;" id="kg-status-sub">Connecting to
+                                    Knowledge Graph API...</div>
+                                <div
+                                    style="width: 260px; height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden; margin-top: 4px;">
+                                    <div id="kg-progress-bar"
+                                        style="width: 0%; height: 100%; background: linear-gradient(90deg, #2563EB, #7C3AED); transition: width 0.25s ease;">
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: #2563EB;" id="kg-progress-text">
+                                    0%</div>
+                            </div>
+                            <div id="cy" style="width: 100%; height: 100%;"></div>
+                            <div id="kg-legend"
+                                style="position: absolute; bottom: 14px; left: 14px; background: #FFFFFF; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.78rem; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); z-index: 5;">
+                                <span style="font-weight: 700; color: var(--text-color); margin-right: 2px;">Entity
+                                    Legend:</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #7C3AED; font-size: 1rem;">●</strong> Repository</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #2563EB; font-size: 1rem;">●</strong> Folder</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #0284C7; font-size: 1rem;">●</strong> File</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #16A34A; font-size: 1rem;">●</strong> Class</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #D97706; font-size: 1rem;">●</strong> Function</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #E11D48; font-size: 1rem;">●</strong> API Endpoint</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #0D9488; font-size: 1rem;">●</strong> Package</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><strong
+                                        style="color: #4F46E5; font-size: 1rem;">●</strong> Database</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top: 15px;">
+                        <div class="section-title" style="font-size: 1.1rem; border-bottom: 0;">Knowledge Graph Settings
+                        </div>
                         <div class="checkbox-group">
                             <input type="checkbox" name="knowledge_graph.include_classes" id="graph-classes">
                             <label for="graph-classes" class="option-label">Include Class Entities</label>
@@ -764,9 +1353,18 @@
                             <label class="option-label">Cache Size (Files)</label>
                             <input type="number" name="performance.cache_size" min="1" required>
                         </div>
-                        <div class="checkbox-group">
+                        <div class="checkbox-group"
+                            style="background: #F0FDF4; padding: 10px; border-radius: 6px; border: 1px solid #BBF7D0; margin-bottom: 12px;">
+                            <input type="checkbox" name="performance.fast_scan" id="perf-fast-scan">
+                            <label for="perf-fast-scan" class="option-label"
+                                style="font-weight: 700; color: #15803D;">🚀 Fast Scan Mode (Optimized Hash &
+                                Parsing)</label>
+                        </div>
+                        <div class="checkbox-group"
+                            style="background: #EFF6FF; padding: 10px; border-radius: 6px; border: 1px solid #BFDBFE; margin-bottom: 12px;">
                             <input type="checkbox" name="performance.incremental_scan" id="perf-inc">
-                            <label for="perf-inc" class="option-label">Incremental Scan</label>
+                            <label for="perf-inc" class="option-label" style="font-weight: 700; color: #1D4ED8;">⚡
+                                Incremental Scan Mode (Reuse Cache for Unchanged Files)</label>
                         </div>
                         <div class="checkbox-group">
                             <input type="checkbox" name="performance.skip_unchanged_files" id="perf-skip">
@@ -820,7 +1418,8 @@
                         </div>
                         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn btn-critical" onclick="restoreDefaults()">Restore Defaults</button>
+                            <button type="button" class="btn btn-critical" onclick="restoreDefaults()">Restore
+                                Defaults</button>
                         </div>
                     </div>
                 </div>
@@ -848,6 +1447,252 @@
                     </div>
                 </div>
 
+                <!-- Page 11: Command Profiles -->
+                <div id="page-profiles" class="page-card">
+                    <div class="section-title">Command Profiles</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                                <div>
+                                    <div class="option-label" style="font-size: 1.1rem;">Manage Custom Command Shortcuts
+                                    </div>
+                                    <div class="option-desc">Create custom command profiles (e.g.
+                                        <code>archon backend</code>) that execute a saved sequence of Archon CLI
+                                        commands in order.</div>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="exportProfilesOnly()">Export Profiles</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="triggerProfilesImport()">Import Profiles</button>
+                                    <input type="file" id="import-profiles-file" style="display:none" accept=".json"
+                                        onchange="importProfilesFromFile(event)">
+                                    <button type="button" class="btn btn-primary" onclick="openProfileModal()">+ Create
+                                        New Profile</button>
+                                </div>
+                            </div>
+
+                            <div id="profiles-list-container"
+                                style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                                <!-- Dynamically filled by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 12: Secret Vault -->
+                <div id="page-vault" class="page-card">
+                    <div class="section-title">Secret Vault (AES-256-GCM File Protection)</div>
+                    <div class="card">
+                        <div class="option-group">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <div class="option-label"
+                                        style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                        Vault Status
+                                        <span id="vault-status-badge-page"
+                                            style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: var(--warning-color); color: #fff;">Checking...</span>
+                                    </div>
+                                    <div class="option-desc">Encrypt sensitive workspace files (such as
+                                        <code>.env</code>, <code>credentials.json</code>, <code>*.pem</code>) using
+                                        AES-256-GCM with scrypt key derivation.</div>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="openVaultPasswordModal()">Set / Change Password</button>
+                                    <button type="button" class="btn btn-primary" onclick="openVaultMaskModal()">+
+                                        Protect Files</button>
+                                </div>
+                            </div>
+
+                            <!-- Protected Files Table -->
+                            <div id="vault-files-container-page" style="margin-top: 15px;">
+                                <!-- Filled dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 13: CLI Commands Guide -->
+                <div id="page-cli-help" class="page-card">
+                    <div class="section-title">CLI Commands & Options Guide</div>
+
+                    <!-- Card 1: Core Scanning Commands -->
+                    <div class="card">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-color); margin-bottom: 4px;">
+                            Core Scanning & Intelligence Commands</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">Archon One
+                            features 3 primary intelligence command modules with unified flags:</div>
+
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Command 1 -->
+                            <div
+                                style="background: var(--bg-hover, #F8FAFC); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span
+                                        style="font-weight: 700; color: #2563EB; font-family: monospace; font-size: 0.95rem;">archon
+                                        scan [path]</span>
+                                    <span
+                                        style="font-size: 0.75rem; background: #DBEAFE; color: #1E40AF; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Full
+                                        Scan</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-color); margin-bottom: 8px;">Scans
+                                    codebase for Code Metrics, Security Audit, Code Analysis, Contributor Analysis, &
+                                    Repository Intelligence (excluding Knowledge Graph).</div>
+                                <div
+                                    style="font-size: 0.8rem; background: #FFFFFF; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-family: monospace; line-height: 1.6;">
+                                    <div><strong>archon scan</strong>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                            style="color: #64748B;"># Scan current directory</span></div>
+                                    <div><strong>archon scan -s ./src</strong>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                            style="color: #64748B;"># Specify source path</span></div>
+                                    <div><strong>archon scan -o ./reports</strong>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                            style="color: #64748B;"># Custom output path</span></div>
+                                    <div><strong>archon scan -g https://github.com/...</strong> <span
+                                            style="color: #64748B;"># Clone & scan remote GitHub repo</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Command 2 -->
+                            <div
+                                style="background: var(--bg-hover, #F8FAFC); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span
+                                        style="font-weight: 700; color: #7C3AED; font-family: monospace; font-size: 0.95rem;">archon
+                                        graph [path]</span>
+                                    <span
+                                        style="font-size: 0.75rem; background: #EDE9FE; color: #5B21B6; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Knowledge
+                                        Graph</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-color); margin-bottom: 8px;">Generates
+                                    the 12-file self-contained Knowledge Graph JSON schema, textual summary, and
+                                    markdown repository map.</div>
+                                <div
+                                    style="font-size: 0.8rem; background: #FFFFFF; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-family: monospace; line-height: 1.6;">
+                                    <div><strong>archon graph</strong>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                            style="color: #64748B;"># Generate graph for current directory</span></div>
+                                    <div><strong>archon graph -s ./src -o ./out_graph</strong> &nbsp;&nbsp;<span
+                                            style="color: #64748B;"># Custom source & output paths</span></div>
+                                    <div><strong>archon graph -g https://github.com/...</strong> <span
+                                            style="color: #64748B;"># Generate graph from remote GitHub repo</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Command 3 -->
+                            <div
+                                style="background: var(--bg-hover, #F8FAFC); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span
+                                        style="font-weight: 700; color: #059669; font-family: monospace; font-size: 0.95rem;">archon
+                                        diagrams [path]</span>
+                                    <span
+                                        style="font-size: 0.75rem; background: #D1FAE5; color: #065F46; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Diagrams</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-color); margin-bottom: 8px;">Generates
+                                    14 codebase architecture diagrams in Mermaid, SVG, and PNG formats.</div>
+                                <div
+                                    style="font-size: 0.8rem; background: #FFFFFF; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-family: monospace; line-height: 1.6;">
+                                    <div><strong>archon diagrams</strong>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                            style="color: #64748B;"># Generate diagrams for current directory</span>
+                                    </div>
+                                    <div><strong>archon diagrams -s ./src -o ./out_diag</strong> &nbsp;<span
+                                            style="color: #64748B;"># Custom source & output paths</span></div>
+                                    <div><strong>archon diagrams -g https://github.com/...</strong><span
+                                            style="color: #64748B;"># Remote repo diagrams</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Command Profiles CLI Commands -->
+                    <div class="card">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-color); margin-bottom: 4px;">
+                            Command Profiles (CLI & Web Dashboard)</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Create,
+                            list, edit, delete, and execute custom command shortcuts directly from CLI or Web Dashboard:
+                        </div>
+                        <div
+                            style="font-size: 0.82rem; background: #F8FAFC; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; display: flex; flex-direction: column; gap: 8px; line-height: 1.6;">
+                            <div><strong>archon profiles list</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># List all saved command profiles</span></div>
+                            <div><strong>archon profiles add &lt;name&gt; "cmd1" "cmd2"</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Create a new profile (e.g. archon profiles add backend
+                                    "archon scan" "archon graph")</span></div>
+                            <div><strong>archon profiles edit &lt;name&gt; "cmd1" "cmd2"</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748B;">#
+                                    Update commands sequence for an existing profile</span></div>
+                            <div><strong>archon profiles delete &lt;name&gt;</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Delete a command profile</span></div>
+                            <div><strong>archon &lt;profile_name&gt;</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Run profile command sequence in order</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Secret Vault Protection -->
+                    <div class="card">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-color); margin-bottom: 4px;">
+                            Secret Vault File Protection</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Protect
+                            sensitive environment & credential files using AES-256-GCM authenticated encryption:</div>
+                        <div
+                            style="font-size: 0.82rem; background: #F8FAFC; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; display: flex; flex-direction: column; gap: 8px; line-height: 1.6;">
+                            <div><strong>archon vault status</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Check protection status & list of protected files</span>
+                            </div>
+                            <div><strong>archon vault mask &lt;file_path&gt;</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Encrypt & mask sensitive file (e.g. .env)</span></div>
+                            <div><strong>archon vault unmask &lt;file_path&gt;</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Decrypt & restore file using master password</span></div>
+                            <div><strong>archon vault change-password</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Re-encrypt vault with new master password</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Report Compilation & Utilities -->
+                    <div class="card">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-color); margin-bottom: 4px;">
+                            Report Compilation & Utilities</div>
+                        <div
+                            style="font-size: 0.82rem; background: #F8FAFC; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; display: flex; flex-direction: column; gap: 8px; line-height: 1.6;">
+                            <div><strong>archon report [scan_dir]</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Compile scan directory into single index.html
+                                    report</span></div>
+                            <div><strong>archon config [--port 8085]</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Launch offline Web Settings & Intelligence
+                                    Dashboard</span></div>
+                            <div><strong>archon reset</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Reset configuration to factory defaults</span></div>
+                            <div><strong>archon help</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Display CLI runner guide</span></div>
+                            <div><strong>archon about</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    style="color: #64748B;"># Show developer & version details</span></div>
+                        </div>
+                    </div>
+                </div>
+
             </form>
         </div>
 
@@ -862,20 +1707,58 @@
     </div>
 
     <script>
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeJs(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r');
+        }
+
         let isDirty = false;
-        let originalConfig = {};
+        function showGlobalLoading(msg = "Loading...") {
+            const overlay = document.getElementById('global-loading-overlay');
+            const msgEl = document.getElementById('global-loading-msg');
+            if (msgEl) msgEl.innerText = msg;
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        function hideGlobalLoading() {
+            const overlay = document.getElementById('global-loading-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
 
         // Load configuration on startup
         window.addEventListener('DOMContentLoaded', () => {
+            showGlobalLoading("Loading workspace configuration...");
             fetch('/api/config')
                 .then(res => res.json())
                 .then(data => {
                     originalConfig = data;
                     populateForm(data);
-                    document.getElementById('config-last-saved').innerText = new Date().toLocaleString();
+                    const lastSavedEl = document.getElementById('config-last-saved');
+                    if (lastSavedEl) lastSavedEl.innerText = new Date().toLocaleString();
                     validateForm();
+                    loadVaultStatus();
+                    hideGlobalLoading();
+                })
+                .catch(err => {
+                    hideGlobalLoading();
+                    console.error("Failed to load configuration", err);
                 });
-                
+
             // Search implementation
             document.getElementById('search-box').addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
@@ -893,15 +1776,545 @@
 
         function switchPage(pageId, element) {
             document.querySelectorAll('.page-card').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            
+            const pageEl = document.getElementById(pageId);
+            if (pageEl) pageEl.classList.add('active');
+
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            element.classList.add('active');
+            if (element) element.classList.add('active');
+
+            const headerTitle = document.getElementById('project-header');
+            if (headerTitle && element) {
+                headerTitle.innerText = element.innerText.trim() + " Settings";
+            }
+
+            if (pageId === 'page-reports') {
+                loadReportsHistory();
+            } else if (pageId === 'page-knowledge-graph') {
+                loadGraphData();
+            }
+        }
+
+        // ==========================================
+        // REPORTS HISTORY & VIEWER LOGIC
+        // ==========================================
+        function loadReportsHistory() {
+            showGlobalLoading("Loading scan history...");
+            fetch('/api/reports/history')
+                .then(res => res.json())
+                .then(scans => {
+                    hideGlobalLoading();
+                    renderReportsHistory(scans);
+                })
+                .catch(err => {
+                    hideGlobalLoading();
+                    console.error("Failed to load reports history", err);
+                });
+        }
+
+        function renderReportsHistory(scans) {
+            const container = document.getElementById('reports-history-container');
+            if (!container) return;
+
+            if (!scans || scans.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-secondary);">
+                        <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-color);">No Scan Reports Found</div>
+                        <div style="font-size: 0.875rem; margin-top: 6px;">Run <code>archon scan</code> in your terminal to generate repository intelligence reports.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let itemsHtml = scans.map(s => {
+                let healthColor = "#16A34A";
+                if (s.health_score < 70) healthColor = "#DC2626";
+                else if (s.health_score < 85) healthColor = "#D97706";
+
+                let viewBtnHtml = '';
+                if (s.has_index && s.report_url) {
+                    viewBtnHtml = `<button type="button" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openReportViewer('${escapeJs(s.report_url)}')">View Report ➔</button>`;
+                } else if (s.report_url) {
+                    viewBtnHtml = `<button type="button" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openReportViewer('${escapeJs(s.report_url)}')">View Module Report ➔</button>`;
+                } else {
+                    viewBtnHtml = `<button type="button" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="compileAndOpenReport('${escapeJs(s.rel_path)}')">Compile & View Report ➔</button>`;
+                }
+
+                return `
+                    <div class="card" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 18px; border-left: 5px solid ${healthColor}; flex-wrap: wrap; gap: 15px; background: #FFFFFF; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <span style="font-weight: 700; font-size: 1.05rem; color: #0F172A; font-family: monospace;">${escapeHtml(s.folder_name)}</span>
+                                <span style="background: ${healthColor}; color: #ffffff; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 12px;">Grade ${escapeHtml(s.health_grade)} (${s.health_score}%)</span>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #64748B; margin-top: 6px; display: flex; gap: 18px; flex-wrap: wrap; align-items: center;">
+                                <span>📅 ${escapeHtml(s.timestamp)}</span>
+                                <span>📁 <strong>${s.files_count}</strong> files (${(s.total_loc || 0).toLocaleString()} LOC)</span>
+                                <span>🛡️ <strong>${s.vulnerabilities}</strong> vulns</span>
+                                ${s.graph_nodes > 0 ? `<span>🕸️ <strong>${s.graph_nodes}</strong> graph nodes</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            ${viewBtnHtml}
+                            <button type="button" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; color: #DC2626; border-color: #FCA5A5;" onclick="deleteReportHistory('${escapeJs(s.rel_path)}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div style="display: flex; flex-direction: column; gap: 14px;">${itemsHtml}</div>`;
+        }
+
+        function compileAndOpenReport(relPath) {
+            showGlobalLoading("Compiling unified index.html report...");
+            fetch('/api/reports/compile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: relPath })
+            })
+                .then(res => res.json().then(data => ({ status: res.status, body: data })))
+                .then(res => {
+                    hideGlobalLoading();
+                    if (res.status === 200 && res.body.status === 'success' && res.body.report_url) {
+                        openReportViewer(res.body.report_url);
+                        loadReportsHistory();
+                    } else {
+                        const errCode = (res.body && res.body.error_code) ? res.body.error_code : `HTTP_${res.status}`;
+                        const msg = (res.body && res.body.message) ? res.body.message : "Failed to compile unified report.";
+                        showPopupModal(`Compilation Failed [${errCode}]`, msg, false);
+                    }
+                })
+                .catch(err => {
+                    hideGlobalLoading();
+                    showPopupModal("Network Error [ERR_NET_FAILURE]", "Failed to compile report: " + err.message, false);
+                });
+        }
+
+        function openReportViewer(reportPath) {
+            if (!reportPath) return;
+            const targetUrl = '/api/reports/view?path=' + encodeURIComponent(reportPath);
+            window.open(targetUrl, '_blank');
+        }
+
+        function closeReportViewerModal() {
+            document.getElementById('report-viewer-modal').style.display = 'none';
+            const iframe = document.getElementById('report-iframe');
+            if (iframe) iframe.src = 'about:blank';
+        }
+
+        function deleteReportHistory(relPath) {
+            if (!confirm(`Are you sure you want to delete scan history '${relPath}'?`)) return;
+            showGlobalLoading("Deleting scan history...");
+            fetch('/api/reports/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: relPath })
+            })
+                .then(res => res.json().then(data => ({ status: res.status, body: data })))
+                .then(res => {
+                    hideGlobalLoading();
+                    if (res.status === 200 && res.body.status === 'success') {
+                        showPopupModal("Scan History Deleted", res.body.message || `Scan history '${relPath}' deleted successfully.`, true);
+                        showToast("Scan history deleted successfully!");
+                        loadReportsHistory();
+                    } else {
+                        const errCode = (res.body && res.body.error_code) ? res.body.error_code : `HTTP_${res.status}`;
+                        const msg = (res.body && res.body.message) ? res.body.message : "Failed to delete scan directory.";
+                        showPopupModal(`Delete Failed [${errCode}]`, msg, false);
+                        showToast(`[${errCode}] ${msg}`, "error");
+                    }
+                })
+                .catch(err => {
+                    hideGlobalLoading();
+                    showPopupModal("Network Error [ERR_NET_FAILURE]", "Failed to communicate with Settings server: " + err.message, false);
+                    showToast("Network error deleting scan history", "error");
+                });
+        }
+
+        // ==========================================
+        // INTERACTIVE KNOWLEDGE GRAPH LOGIC
+        // ==========================================
+        let cy = null;
+        let graphDataCache = null;
+
+        function loadGraphData() {
+            const overlay = document.getElementById('kg-loading-overlay');
+            const progressBar = document.getElementById('kg-progress-bar');
+            const progressText = document.getElementById('kg-progress-text');
+            const statusTitle = document.getElementById('kg-status-title');
+            const statusSub = document.getElementById('kg-status-sub');
+
+            if (overlay) overlay.style.display = 'flex';
+
+            function updateGraphProgress(pct, subText) {
+                if (progressBar) progressBar.style.width = pct + '%';
+                if (progressText) progressText.innerText = pct + '%';
+                if (statusSub && subText) statusSub.innerText = subText;
+            }
+
+            updateGraphProgress(10, "Connecting to Knowledge Graph API...");
+
+            let p = 10;
+            const timer = setInterval(() => {
+                if (p < 85) {
+                    p += Math.floor(Math.random() * 10) + 4;
+                    if (p > 85) p = 85;
+                    let msg = "Fetching repository entities & relationships...";
+                    if (p > 30) msg = "Parsing classes, functions, and method signatures...";
+                    if (p > 60) msg = "Synthesizing dependencies and API endpoints...";
+                    updateGraphProgress(p, msg);
+                }
+            }, 100);
+
+            fetch('/api/graph/data')
+                .then(res => res.json())
+                .then(data => {
+                    clearInterval(timer);
+                    updateGraphProgress(95, "Rendering 2D viewport layout & edges...");
+                    setTimeout(() => {
+                        graphDataCache = data;
+                        renderGraphCanvas(data);
+                        updateGraphProgress(100, "Render complete");
+                        setTimeout(() => {
+                            if (overlay) overlay.style.display = 'none';
+                        }, 200);
+                    }, 150);
+                })
+                .catch(err => {
+                    clearInterval(timer);
+                    console.error("Failed to load graph data", err);
+                    if (overlay) {
+                        overlay.innerHTML = '<div style="color: #DC2626; font-weight: 700; font-size: 0.95rem;">Failed to load Knowledge Graph data</div>';
+                    }
+                });
+        }
+
+        function renderGraphCanvas(data) {
+            const container = document.getElementById('cy');
+            if (!container) return;
+
+            const typeCounters = {};
+            const nodes = (data.nodes || []).map(n => {
+                let nType = (n.type || 'file').toLowerCase();
+                let color = '#0284C7';
+                let tierRadius = 400;
+
+                if (nType.includes('repo')) {
+                    color = '#7C3AED'; tierRadius = 0;
+                } else if (nType.includes('folder') || nType.includes('directory')) {
+                    color = '#2563EB'; tierRadius = 160;
+                } else if (nType.includes('class') || nType.includes('interface')) {
+                    color = '#16A34A'; tierRadius = 600;
+                } else if (nType.includes('func') || nType.includes('method') || nType.includes('constructor')) {
+                    color = '#D97706'; tierRadius = 800;
+                } else if (nType.includes('api') || nType.includes('endpoint')) {
+                    color = '#E11D48'; tierRadius = 1000;
+                } else if (nType.includes('dep') || nType.includes('package')) {
+                    color = '#0D9488'; tierRadius = 1200;
+                } else if (nType.includes('db') || nType.includes('database') || nType.includes('table')) {
+                    color = '#4F46E5'; tierRadius = 1400;
+                }
+
+                typeCounters[nType] = (typeCounters[nType] || 0) + 1;
+                let count = typeCounters[nType];
+                let angle = (count * 0.35);
+                let posX = tierRadius === 0 ? 0 : Math.cos(angle) * (tierRadius + (count * 3));
+                let posY = tierRadius === 0 ? 0 : Math.sin(angle) * (tierRadius + (count * 3));
+
+                return {
+                    data: {
+                        id: n.id,
+                        label: n.label || n.name || n.id,
+                        type: nType,
+                        color: color,
+                        raw: n
+                    },
+                    position: { x: posX, y: posY }
+                };
+            });
+
+            const edges = (data.edges || []).map(e => ({
+                data: {
+                    id: e.id || (e.source + '_' + e.target),
+                    source: e.source,
+                    target: e.target,
+                    label: e.type || ''
+                }
+            }));
+
+            if (window.cytoscape) {
+                try {
+                    if (cy) cy.destroy();
+                    cy = cytoscape({
+                        container: container,
+                        elements: [...nodes, ...edges],
+                        textureOnViewport: true,
+                        pixelRatio: 1.0,
+                        hideEdgesOnViewport: true,
+                        hideEdgesOnDrag: true,
+                        style: [
+                            {
+                                selector: 'node',
+                                style: {
+                                    'background-color': 'data(color)',
+                                    'label': 'data(label)',
+                                    'color': '#0F172A',
+                                    'font-size': '11px',
+                                    'font-family': 'Inter, sans-serif',
+                                    'text-valign': 'bottom',
+                                    'text-margin-y': 4,
+                                    'width': 22,
+                                    'height': 22
+                                }
+                            },
+                            {
+                                selector: 'edge',
+                                style: {
+                                    'width': 1.2,
+                                    'line-color': '#CBD5E1',
+                                    'target-arrow-color': '#CBD5E1',
+                                    'target-arrow-shape': 'triangle',
+                                    'curve-style': 'haystack',
+                                    'opacity': 0.6
+                                }
+                            },
+                            {
+                                selector: ':selected',
+                                style: {
+                                    'border-width': 3,
+                                    'border-color': '#2563EB',
+                                    'line-color': '#2563EB',
+                                    'target-arrow-color': '#2563EB'
+                                }
+                            }
+                        ],
+                        layout: {
+                            name: 'preset',
+                            animate: false
+                        }
+                    });
+
+                    cy.on('tap', 'node', function (evt) {
+                        const node = evt.target;
+                        openNodeInspector(node.data('raw'));
+                    });
+
+                    filterGraphNodes();
+                    cy.fit();
+                } catch (e) {
+                    renderSvgFallback(container, nodes, edges);
+                }
+            } else {
+                renderSvgFallback(container, nodes, edges);
+            }
+        }
+
+        function renderSvgFallback(container, nodes, edges) {
+            if (!container) return;
+            let displayNodes = nodes;
+            let svgNodes = displayNodes.map((n, idx) => {
+                let angle = (idx / Math.max(1, displayNodes.length)) * 2 * Math.PI;
+                let cx = 350 + Math.cos(angle) * 180;
+                let cy = 250 + Math.sin(angle) * 180;
+                return `<circle cx="${cx}" cy="${cy}" r="13" fill="${n.data.color}" stroke="#CBD5E1" stroke-width="2" onclick="openNodeInspector(${escapeJs(JSON.stringify(n.data.raw))})" style="cursor:pointer;"/><text x="${cx}" y="${cy + 24}" fill="#0F172A" font-size="10" text-anchor="middle">${escapeHtml(n.data.label)}</text>`;
+            }).join('');
+
+            container.innerHTML = `
+                <svg width="100%" height="100%" viewBox="0 0 700 500" style="background: #FAFAFA;">
+                    <circle cx="350" cy="250" r="24" fill="#7C3AED"/>
+                    <text x="350" y="288" fill="#0F172A" font-size="12" text-anchor="middle" font-weight="bold">Repository Root</text>
+                    ${svgNodes}
+                </svg>
+            `;
+        }
+
+        function filterGraphNodes() {
+            if (!cy) return;
+            const showFile = document.getElementById('kg-filter-file').checked;
+            const showClass = document.getElementById('kg-filter-class').checked;
+            const showFunc = document.getElementById('kg-filter-func').checked;
+            const showApi = document.getElementById('kg-filter-api').checked;
+            const showDb = document.getElementById('kg-filter-db').checked;
+            const showDep = document.getElementById('kg-filter-dep') ? document.getElementById('kg-filter-dep').checked : true;
+
+            cy.nodes().forEach(node => {
+                let t = (node.data('type') || '').toLowerCase();
+                let visible = true;
+                if (t.includes('file') && !showFile) visible = false;
+                if (t.includes('class') && !showClass) visible = false;
+                if ((t.includes('func') || t.includes('method') || t.includes('constructor')) && !showFunc) visible = false;
+                if ((t.includes('api') || t.includes('endpoint')) && !showApi) visible = false;
+                if ((t.includes('db') || t.includes('database') || t.includes('table')) && !showDb) visible = false;
+                if ((t.includes('dep') || t.includes('package')) && !showDep) visible = false;
+
+                if (visible) node.show(); else node.hide();
+            });
+        }
+
+        function searchGraphNodes() {
+            if (!cy) return;
+            const q = document.getElementById('kg-search').value.toLowerCase().trim();
+            if (!q) {
+                cy.nodes().style('opacity', 1);
+                return;
+            }
+            cy.nodes().forEach(node => {
+                let lbl = (node.data('label') || '').toLowerCase();
+                if (lbl.includes(q)) {
+                    node.style('opacity', 1);
+                } else {
+                    node.style('opacity', 0.25);
+                }
+            });
+        }
+
+        function resetGraphView() {
+            if (cy) {
+                cy.fit();
+                cy.center();
+            }
+        }
+
+        function openNodeInspector(nodeData) {
+            if (!nodeData) return;
+            const nid = nodeData.id || '';
+            const nname = nodeData.name || nodeData.label || nodeData.id;
+            document.getElementById('kg-node-title').innerText = `${nodeData.type || 'Entity'}: ${nname}`;
+            const contentEl = document.getElementById('kg-node-content');
+
+            let detailsHtml = `
+                <div style="background: #F8FAFC; padding: 14px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="font-weight: 700; color: var(--text-color); margin-bottom: 8px;">Entity Overview</div>
+                    <div style="display: grid; grid-template-columns: 120px 1fr; gap: 6px; font-size: 0.85rem;">
+                        <span style="font-weight: 600; color: var(--text-secondary);">ID:</span> <code>${escapeHtml(nid)}</code>
+                        <span style="font-weight: 600; color: var(--text-secondary);">Type:</span> <span style="font-weight: 700; color: var(--primary-color);">${escapeHtml(nodeData.type || 'Unknown')}</span>
+                        <span style="font-weight: 600; color: var(--text-secondary);">Name:</span> <span>${escapeHtml(nname)}</span>
+                        ${nodeData.path ? `<span style="font-weight: 600; color: var(--text-secondary);">Path:</span> <code>${escapeHtml(nodeData.path)}</code>` : ''}
+                        ${nodeData.start_line ? `<span style="font-weight: 600; color: var(--text-secondary);">Line Range:</span> <span>${nodeData.start_line} - ${nodeData.end_line || nodeData.start_line}</span>` : ''}
+                    </div>
+                </div>
+            `;
+
+            if (graphDataCache) {
+                // Class Lookup
+                const clsItem = (graphDataCache.classes || []).find(c => c.name === nname || c.file === nodeData.path || nid.includes(c.name));
+                if (clsItem) {
+                    detailsHtml += `
+                        <div style="margin-top: 12px; background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 700; color: var(--text-color); margin-bottom: 6px;">Class Architecture Details</div>
+                            <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+                                ${clsItem.parent_class ? `<div><strong>Parent Class:</strong> <code>${escapeHtml(clsItem.parent_class)}</code></div>` : ''}
+                                ${clsItem.namespace ? `<div><strong>Namespace:</strong> <code>${escapeHtml(clsItem.namespace)}</code></div>` : ''}
+                                <div><strong>Visibility:</strong> ${escapeHtml(clsItem.visibility || 'public')}</div>
+                                <div><strong>Complexity Score:</strong> ${clsItem.complexity || 1}</div>
+                                <div><strong>LOC:</strong> ${clsItem.loc || 0} (Lines ${clsItem.start_line || 1} - ${clsItem.end_line || 1})</div>
+                                ${clsItem.methods && clsItem.methods.length ? `<div><strong>Methods:</strong> <code>${escapeHtml(clsItem.methods.join(', '))}</code></div>` : ''}
+                                ${clsItem.fields && clsItem.fields.length ? `<div><strong>Fields:</strong> <code>${escapeHtml(clsItem.fields.join(', '))}</code></div>` : ''}
+                                ${clsItem.documentation ? `<div style="margin-top: 4px; padding: 6px; background: #F1F5F9; border-radius: 4px;"><strong>Docstring:</strong> ${escapeHtml(clsItem.documentation)}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Function Lookup
+                const fnItem = (graphDataCache.functions || []).find(f => f.name === nname || f.file === nodeData.path || nid.includes(f.name));
+                if (fnItem) {
+                    detailsHtml += `
+                        <div style="margin-top: 12px; background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 700; color: var(--text-color); margin-bottom: 6px;">Function Details & Signatures</div>
+                            <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+                                ${fnItem.class ? `<div><strong>Class:</strong> <code>${escapeHtml(fnItem.class)}</code></div>` : ''}
+                                <div><strong>Parameters:</strong> <code>${escapeHtml(JSON.stringify(fnItem.parameters || []))}</code></div>
+                                <div><strong>Return Type:</strong> <code>${escapeHtml(fnItem.return_type || 'void')}</code></div>
+                                <div><strong>Complexity Score:</strong> <span>${fnItem.complexity || 1}</span></div>
+                                <div><strong>LOC:</strong> ${fnItem.loc || 0} (Lines ${fnItem.start_line || 1} - ${fnItem.end_line || 1})</div>
+                                ${fnItem.calls && fnItem.calls.length ? `<div><strong>Calls:</strong> <code>${escapeHtml(fnItem.calls.join(', '))}</code></div>` : ''}
+                                ${fnItem.called_by && fnItem.called_by.length ? `<div><strong>Called By:</strong> <code>${escapeHtml(fnItem.called_by.join(', '))}</code></div>` : ''}
+                                ${fnItem.documentation ? `<div style="margin-top: 4px; padding: 6px; background: #F1F5F9; border-radius: 4px;"><strong>Documentation:</strong> ${escapeHtml(fnItem.documentation)}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // File Lookup
+                const fileItem = (graphDataCache.files || []).find(f => f.path === nodeData.path || f.name === nname);
+                if (fileItem) {
+                    detailsHtml += `
+                        <div style="margin-top: 12px; background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 700; color: var(--text-color); margin-bottom: 6px;">File System Metrics</div>
+                            <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <div><strong>Total LOC:</strong> ${fileItem.total_loc || 0}</div>
+                                <div><strong>Code Lines:</strong> ${fileItem.code_lines || 0}</div>
+                                <div><strong>Comment Lines:</strong> ${fileItem.comment_lines || 0}</div>
+                                <div><strong>File Size:</strong> ${fileItem.size || 0} B</div>
+                                ${fileItem.sha256_hash ? `<div style="grid-column: span 2;"><strong>SHA256:</strong> <code style="font-size: 0.75rem;">${fileItem.sha256_hash}</code></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Folder Lookup
+                const folderItem = (graphDataCache.folders || []).find(f => f.path === nodeData.path || f.name === nname);
+                if (folderItem) {
+                    detailsHtml += `
+                        <div style="margin-top: 12px; background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 700; color: var(--text-color); margin-bottom: 6px;">Folder Metrics</div>
+                            <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+                                <div><strong>Total LOC:</strong> ${folderItem.total_loc || 0}</div>
+                                <div><strong>Child Files:</strong> ${folderItem.child_files ? folderItem.child_files.length : 0}</div>
+                                <div><strong>Child Folders:</strong> ${folderItem.child_folders ? folderItem.child_folders.length : 0}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Dependency Lookup
+                const depItem = (graphDataCache.dependencies || []).find(d => d.package_name === nname || nid.includes(d.package_name));
+                if (depItem) {
+                    detailsHtml += `
+                        <div style="margin-top: 12px; background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 700; color: var(--text-color); margin-bottom: 6px;">Package Dependency Details</div>
+                            <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+                                <div><strong>Package Name:</strong> <code>${escapeHtml(depItem.package_name)}</code></div>
+                                <div><strong>Version:</strong> ${escapeHtml(depItem.version || 'latest')}</div>
+                                <div><strong>Type:</strong> ${escapeHtml(depItem.type || 'External')}</div>
+                                ${depItem.imported_by && depItem.imported_by.length ? `<div><strong>Imported By:</strong> <code>${escapeHtml(depItem.imported_by.join(', '))}</code></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Raw attributes table
+            if (nodeData.attributes && typeof nodeData.attributes === 'object') {
+                let attrsRows = Object.entries(nodeData.attributes).map(([k, v]) => `
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 6px; font-weight: 600; color: var(--text-secondary); width: 140px;">${escapeHtml(k)}</td>
+                        <td style="padding: 6px; color: var(--text-color); font-family: monospace;">${escapeHtml(typeof v === 'object' ? JSON.stringify(v) : String(v))}</td>
+                    </tr>
+                `).join('');
+
+                detailsHtml += `
+                    <div style="margin-top: 12px;">
+                        <div style="font-weight: 700; margin-bottom: 6px; font-size: 0.9rem;">Attributes & Properties</div>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <tbody>${attrsRows}</tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            contentEl.innerHTML = detailsHtml;
+            document.getElementById('kg-node-modal').style.display = 'flex';
+        }
+
+        function closeNodeInspector() {
+            document.getElementById('kg-node-modal').style.display = 'none';
         }
 
         function populateForm(data) {
             const form = document.getElementById('config-form');
             for (const section in data) {
+                if (section === 'profiles') continue;
                 for (const key in data[section]) {
                     const name = `${section}.${key}`;
                     const val = data[section][key];
@@ -917,35 +2330,41 @@
                     }
                 }
             }
+            currentProfiles = data.profiles || {};
+            renderProfilesList();
             isDirty = false;
             updateStatus();
         }
 
         function formToJSON() {
             const form = document.getElementById('config-form');
-            const data = {};
-            
-            // Loop inputs and build nested structure
+            const data = JSON.parse(JSON.stringify(originalConfig || {}));
+
             for (let i = 0; i < form.elements.length; i++) {
                 const input = form.elements[i];
-                if (!input.name) continue;
-                
+                if (!input.name || input.disabled) continue;
+
                 const parts = input.name.split('.');
-                const section = parts[0];
-                const key = parts[1];
-                
-                if (!data[section]) data[section] = {};
-                
+                let curr = data;
+                for (let k = 0; k < parts.length - 1; k++) {
+                    if (!curr[parts[k]] || typeof curr[parts[k]] !== 'object') {
+                        curr[parts[k]] = {};
+                    }
+                    curr = curr[parts[k]];
+                }
+                const key = parts[parts.length - 1];
+
                 if (input.type === 'checkbox') {
-                    data[section][key] = input.checked;
+                    curr[key] = input.checked;
                 } else if (input.type === 'number') {
-                    data[section][key] = Number(input.value);
-                } else if (input.name.includes('ignore_directories') || input.name.includes('ignore_files') || input.name.includes('ignore_extensions')) {
-                    data[section][key] = input.value.split(',').map(x => x.trim()).filter(x => x.length > 0);
+                    curr[key] = input.value === '' ? 0 : Number(input.value);
+                } else if (Array.isArray(curr[key]) || key.includes('ignore_') || key.includes('extensions')) {
+                    curr[key] = input.value.split(',').map(x => x.trim()).filter(x => x.length > 0);
                 } else {
-                    data[section][key] = input.value;
+                    curr[key] = input.value;
                 }
             }
+            data.profiles = currentProfiles || {};
             return data;
         }
 
@@ -959,9 +2378,9 @@
             const form = document.getElementById('config-form');
             const valText = document.getElementById('validation-text');
             const statusDot = document.getElementById('status-dot');
-            
+
             let errors = [];
-            
+
             // Basic threshold validation
             const numInputs = form.querySelectorAll('input[type="number"]');
             numInputs.forEach(input => {
@@ -970,15 +2389,19 @@
                     errors.push(`${input.name} must be a positive number`);
                 }
             });
-            
+
             if (errors.length > 0) {
-                valText.innerText = `Invalid: ${errors[0]}`;
-                valText.style.color = 'var(--critical-color)';
-                statusDot.className = 'status-dot error';
+                if (valText) {
+                    valText.innerText = `Invalid: ${errors[0]}`;
+                    valText.style.color = 'var(--critical-color)';
+                }
+                if (statusDot) statusDot.className = 'status-dot error';
                 return false;
             } else {
-                valText.innerText = "All settings are valid";
-                valText.style.color = 'var(--text-color)';
+                if (valText) {
+                    valText.innerText = "All settings are valid";
+                    valText.style.color = 'var(--text-color)';
+                }
                 updateStatus();
                 return true;
             }
@@ -987,17 +2410,17 @@
         function updateStatus() {
             const statusText = document.getElementById('status-text');
             const statusDot = document.getElementById('status-dot');
-            if (isDirty) {
-                statusText.innerText = "Unsaved Changes";
-                statusDot.className = "status-dot dirty";
-            } else {
-                statusText.innerText = "Configuration Saved";
-                statusDot.className = "status-dot";
+            if (statusText) {
+                statusText.innerText = isDirty ? "Unsaved Changes" : "Configuration Saved";
+            }
+            if (statusDot) {
+                statusDot.className = isDirty ? "status-dot dirty" : "status-dot";
             }
         }
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
+            if (!toast) return;
             toast.innerText = message;
             toast.style.backgroundColor = type === 'error' ? 'var(--critical-color)' : 'var(--success-color)';
             toast.style.display = 'block';
@@ -1006,45 +2429,86 @@
             }, 3000);
         }
 
-        function saveConfig() {
-            if (!validateForm()) {
-                showToast("Cannot save: Form has errors", "error");
-                return;
+        function showPopupModal(title, message, isSuccess = true) {
+            const modal = document.getElementById('info-modal');
+            const titleEl = document.getElementById('info-modal-title');
+            const bodyEl = document.getElementById('info-modal-body');
+            const iconEl = document.getElementById('info-modal-icon');
+
+            if (titleEl) titleEl.innerText = title;
+            if (bodyEl) bodyEl.innerText = message;
+            if (iconEl) {
+                iconEl.innerText = isSuccess ? '✓' : '✕';
+                iconEl.style.background = isSuccess ? '#DCFCE7' : '#FEE2E2';
+                iconEl.style.color = isSuccess ? '#16A34A' : '#DC2626';
             }
-            
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeInfoModal() {
+            const modal = document.getElementById('info-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function saveConfig() {
+            showGlobalLoading("Saving configuration changes...");
             const data = formToJSON();
             fetch('/api/config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === 'success') {
-                    isDirty = false;
-                    originalConfig = data;
-                    updateStatus();
-                    document.getElementById('config-last-saved').innerText = new Date().toLocaleString();
-                    showToast("Configuration saved successfully!");
-                } else {
-                    showToast("Failed to save configuration", "error");
-                }
-            });
+                .then(res => res.json())
+                .then(res => {
+                    hideGlobalLoading();
+                    if (res.status === 'success') {
+                        isDirty = false;
+                        originalConfig = data;
+                        updateStatus();
+                        const lastSavedEl = document.getElementById('config-last-saved');
+                        if (lastSavedEl) lastSavedEl.innerText = new Date().toLocaleString();
+                        showPopupModal("Configuration Saved", "Your workspace settings have been saved to archon-config.json successfully!", true);
+                        showToast("Configuration saved successfully!");
+                    } else {
+                        showPopupModal("Save Failed", res.message || "Failed to save configuration", false);
+                        showToast(res.message || "Failed to save configuration", "error");
+                    }
+                })
+                .catch(err => {
+                    hideGlobalLoading();
+                    showPopupModal("Network Error", "Failed to communicate with Settings Manager server.", false);
+                    showToast("Network error while saving settings", "error");
+                });
         }
 
         function resetPage() {
-            populateForm(originalConfig);
-            showToast("Page settings reset to last saved state");
+            if (confirm("Reset current page settings to their last saved state?")) {
+                populateForm(originalConfig);
+                isDirty = false;
+                updateStatus();
+                showPopupModal("Settings Reset", "Current page settings have been successfully reset to their last saved state.", true);
+                showToast("Page settings reset to last saved state");
+            }
         }
 
         function restoreDefaults() {
-            if (confirm("Are you sure you want to restore default config values?")) {
+            if (confirm("Are you sure you want to restore default config values across all sections?")) {
+                showGlobalLoading("Restoring factory defaults...");
                 fetch('/api/config/reset', { method: 'POST' })
                     .then(res => res.json())
                     .then(data => {
+                        hideGlobalLoading();
                         originalConfig = data;
                         populateForm(data);
+                        isDirty = false;
+                        updateStatus();
+                        showPopupModal("Factory Defaults Restored", "All configuration settings have been restored to factory defaults.", true);
                         showToast("Restored factory defaults successfully!");
+                    })
+                    .catch(err => {
+                        hideGlobalLoading();
+                        showPopupModal("Reset Failed", "Failed to restore factory defaults", false);
+                        showToast("Failed to restore factory defaults", "error");
                     });
             }
         }
@@ -1056,7 +2520,8 @@
         function importConfig(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
+            showGlobalLoading("Importing configuration file...");
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
@@ -1064,8 +2529,10 @@
                     populateForm(data);
                     isDirty = true;
                     updateStatus();
-                    showToast("Imported configuration successfully! Remember to save changes.");
+                    hideGlobalLoading();
+                    showToast("Configuration imported successfully! Click 'Save Changes' to apply.");
                 } catch (err) {
+                    hideGlobalLoading();
                     showToast("Invalid JSON file", "error");
                 }
             };
@@ -1094,6 +2561,561 @@
                     });
             }
         }
+
+        // --- Command Profiles JS Handlers ---
+        let currentProfiles = {};
+        const BUILTIN_CMD_LIST = ['scan', 'graph', 'diagrams', 'report', 'config', 'git', 'about', 'help', 'version'];
+
+        function renderProfilesList() {
+            const container = document.getElementById('profiles-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const profileNames = Object.keys(currentProfiles);
+            if (profileNames.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; border: 2px dashed var(--border-color); border-radius: 8px; color: var(--text-color); opacity: 0.7;">
+                        <div style="font-weight: 600; font-size: 1rem; margin-bottom: 5px;">No Command Profiles Configured</div>
+                        <div style="font-size: 0.875rem;">Click "+ Create New Profile" above to map custom commands to Archon CLI sequences.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            profileNames.forEach(name => {
+                const cmds = currentProfiles[name] || [];
+                const card = document.createElement('div');
+                card.style.cssText = "background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;";
+
+                let cmdsHtml = cmds.map(c => `<li><code>${escapeHtml(c)}</code></li>`).join('');
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <div style="font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--primary-btn);">archon ${escapeHtml(name)}</span>
+                            <span style="font-size: 0.75rem; background: var(--card-color); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: 4px;">${cmds.length} command${cmds.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8125rem;" onclick="openProfileModal('${escapeJs(name)}')">Edit</button>
+                            <button type="button" class="btn btn-critical" style="padding: 4px 10px; font-size: 0.8125rem;" onclick="deleteProfile('${escapeJs(name)}')">Delete</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8125rem; opacity: 0.75; margin-bottom: 4px;">Executes sequence:</div>
+                        <ol style="padding-left: 20px; font-size: 0.875rem; display: flex; flex-direction: column; gap: 4px;">
+                            ${cmdsHtml}
+                        </ol>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function escapeJs(str) {
+            return String(str).replace(/'/g, "\\'");
+        }
+
+        function openProfileModal(profileName = null) {
+            const modal = document.getElementById('profile-modal');
+            const titleEl = document.getElementById('profile-modal-title');
+            const editNameEl = document.getElementById('profile-modal-editing-name');
+            const nameEl = document.getElementById('profile-modal-name');
+            const cmdsEl = document.getElementById('profile-modal-commands');
+            const errEl = document.getElementById('profile-modal-error');
+
+            errEl.style.display = 'none';
+            errEl.innerText = '';
+
+            if (profileName && currentProfiles[profileName]) {
+                titleEl.innerText = `Edit Command Profile: archon ${profileName}`;
+                editNameEl.value = profileName;
+                nameEl.value = profileName;
+                cmdsEl.value = currentProfiles[profileName].join('\n');
+            } else {
+                titleEl.innerText = 'Create Command Profile';
+                editNameEl.value = '';
+                nameEl.value = '';
+                cmdsEl.value = '';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        function saveProfileFromModal() {
+            const editName = document.getElementById('profile-modal-editing-name').value.trim();
+            const name = document.getElementById('profile-modal-name').value.trim();
+            const rawCmds = document.getElementById('profile-modal-commands').value;
+            const errEl = document.getElementById('profile-modal-error');
+
+            const cmds = rawCmds.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+
+            // Validation
+            if (!name) {
+                errEl.innerText = "Profile name cannot be empty.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+                errEl.innerText = "Profile name can only contain letters, numbers, underscores, and hyphens.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (BUILTIN_CMD_LIST.includes(name.toLowerCase())) {
+                errEl.innerText = `Profile name '${name}' conflicts with a built-in Archon CLI command.`;
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (cmds.length === 0) {
+                errEl.innerText = "Please specify at least one Archon CLI command to execute.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            for (let c of cmds) {
+                if (c === name || c === `archon ${name}` || c.startsWith(`archon ${name} `)) {
+                    errEl.innerText = `Command '${c}' creates a self-referential loop with profile '${name}'.`;
+                    errEl.style.display = 'block';
+                    return;
+                }
+            }
+
+            if (editName && editName !== name) {
+                delete currentProfiles[editName];
+            }
+
+            currentProfiles[name] = cmds;
+            closeProfileModal();
+            markDirty();
+            renderProfilesList();
+            showToast(`Profile 'archon ${name}' updated. Remember to Save Changes!`);
+        }
+
+        function deleteProfile(name) {
+            if (confirm(`Are you sure you want to delete profile 'archon ${name}'?`)) {
+                delete currentProfiles[name];
+                markDirty();
+                renderProfilesList();
+                showToast(`Deleted profile '${name}'. Click Save Changes to apply.`);
+            }
+        }
+
+        function exportProfilesOnly() {
+            const blob = new Blob([JSON.stringify({ profiles: currentProfiles }, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'archon-profiles.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerProfilesImport() {
+            document.getElementById('import-profiles-file').click();
+        }
+
+        function importProfilesFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let raw = {};
+                    if (data.profiles && typeof data.profiles === 'object') {
+                        raw = data.profiles;
+                    } else if (typeof data === 'object') {
+                        raw = data;
+                    }
+
+                    let count = 0;
+                    for (let pName in raw) {
+                        if (/^[a-zA-Z0-9_-]+$/.test(pName) && !BUILTIN_CMD_LIST.includes(pName.toLowerCase()) && Array.isArray(raw[pName]) && raw[pName].length > 0) {
+                            currentProfiles[pName] = raw[pName].map(x => String(x).trim()).filter(x => x.length > 0);
+                            count++;
+                        }
+                    }
+
+                    if (count > 0) {
+                        markDirty();
+                        renderProfilesList();
+                        showToast(`Successfully imported ${count} profile(s)! Remember to Save Changes.`);
+                    } else {
+                        showToast("No valid command profiles found in file", "error");
+                    }
+                } catch (err) {
+                    showToast("Failed to parse JSON file", "error");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // --- Secret Vault JS Handlers ---
+        let isVaultInitialized = false;
+
+        function loadVaultStatus() {
+            fetch('/api/vault/status')
+                .then(res => res.json())
+                .then(data => {
+                    isVaultInitialized = data.initialized;
+                    const badges = [document.getElementById('vault-status-badge'), document.getElementById('vault-status-badge-page')];
+                    badges.forEach(badge => {
+                        if (badge) {
+                            if (data.initialized) {
+                                badge.innerText = "Vault Active";
+                                badge.style.backgroundColor = "var(--success-color)";
+                            } else {
+                                badge.innerText = "Not Initialized";
+                                badge.style.backgroundColor = "var(--warning-color)";
+                            }
+                        }
+                    });
+                    renderVaultFiles(data.protected_files || []);
+                })
+                .catch(() => { });
+        }
+
+        function renderVaultFiles(files) {
+            const containers = [document.getElementById('vault-files-container'), document.getElementById('vault-files-container-page')];
+            containers.forEach(container => {
+                if (!container) return;
+
+                if (files.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; border: 1px dashed var(--border-color); border-radius: 6px; color: var(--text-color); opacity: 0.7; font-size: 0.875rem;">
+                            No protected files in Secret Vault. Click "+ Protect Files" to encrypt sensitive workspace files.
+                        </div>
+                    `;
+                    return;
+                }
+
+                let rowsHtml = files.map(f => {
+                    const cleanPath = String(f.path || '').replace(/\\/g, '/');
+                    return `
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 8px;"><code>${escapeHtml(cleanPath)}</code></td>
+                        <td style="padding: 8px;">${f.masked_at || 'Unknown'}</td>
+                        <td style="padding: 8px; text-align: right;">
+                            <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" onclick="openVaultUnmaskModal('${escapeJs(cleanPath)}')">Unmask</button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+
+                container.innerHTML = `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
+                                <th style="padding: 8px;">Protected File</th>
+                                <th style="padding: 8px;">Masked Date</th>
+                                <th style="padding: 8px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                `;
+            });
+        }
+
+        function openVaultPasswordModal() {
+            document.getElementById('vault-pwd-old-group').style.display = isVaultInitialized ? 'block' : 'none';
+            document.getElementById('vault-pwd-title').innerText = isVaultInitialized ? "Change Vault Master Password" : "Set Vault Master Password";
+            document.getElementById('vault-pwd-err').style.display = 'none';
+            document.getElementById('vault-pwd-old').value = '';
+            document.getElementById('vault-pwd-new').value = '';
+            document.getElementById('vault-password-modal').style.display = 'flex';
+        }
+
+        function closeVaultPasswordModal() {
+            document.getElementById('vault-password-modal').style.display = 'none';
+        }
+
+        function submitVaultPasswordModal() {
+            const oldPwd = document.getElementById('vault-pwd-old').value;
+            const newPwd = document.getElementById('vault-pwd-new').value;
+            const errEl = document.getElementById('vault-pwd-err');
+
+            if (!newPwd) {
+                errEl.innerText = "New master password cannot be empty.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (!isVaultInitialized) {
+                fetch('/api/vault/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: newPwd })
+                })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            closeVaultPasswordModal();
+                            showToast("Secret Vault initialized successfully!");
+                            loadVaultStatus();
+                        } else {
+                            errEl.innerText = res.message || "Failed to initialize vault.";
+                            errEl.style.display = 'block';
+                        }
+                    });
+            } else {
+                if (!oldPwd) {
+                    errEl.innerText = "Please enter current master password.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+                fetch('/api/vault/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ old_password: oldPwd, new_password: newPwd })
+                })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            closeVaultPasswordModal();
+                            showToast("Master password updated and protected files re-encrypted successfully!");
+                            loadVaultStatus();
+                        } else {
+                            errEl.innerText = res.message || "Failed to change password.";
+                            errEl.style.display = 'block';
+                        }
+                    });
+            }
+        }
+
+        function openVaultMaskModal() {
+            document.getElementById('vault-mask-err').style.display = 'none';
+            document.getElementById('vault-mask-files').value = '';
+            document.getElementById('vault-mask-pwd').value = '';
+            document.getElementById('vault-mask-modal').style.display = 'flex';
+        }
+
+        function closeVaultMaskModal() {
+            document.getElementById('vault-mask-modal').style.display = 'none';
+        }
+
+        function submitVaultMaskModal() {
+            const rawFiles = document.getElementById('vault-mask-files').value;
+            const pwd = document.getElementById('vault-mask-pwd').value;
+            const errEl = document.getElementById('vault-mask-err');
+
+            const files = rawFiles.split('\n').map(x => x.trim()).filter(x => x.length > 0);
+            if (files.length === 0) {
+                errEl.innerText = "Please enter at least one file path to protect.";
+                errEl.style.display = 'block';
+                return;
+            }
+            if (!pwd) {
+                errEl.innerText = "Master password required to encrypt files.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            fetch('/api/vault/mask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pwd, files: files })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        if (res.errors && res.errors.length > 0) {
+                            showToast(`Masked ${res.masked.length} file(s) with warnings: ${res.errors[0]}`, 'error');
+                        } else {
+                            showToast(`Successfully masked and encrypted ${res.masked.length} file(s)!`);
+                        }
+                        closeVaultMaskModal();
+                        loadVaultStatus();
+                    } else {
+                        errEl.innerText = res.message || "Masking failed.";
+                        errEl.style.display = 'block';
+                    }
+                });
+        }
+
+        function openVaultUnmaskModal(filePath) {
+            document.getElementById('vault-unmask-err').style.display = 'none';
+            document.getElementById('vault-unmask-path').value = filePath;
+            document.getElementById('vault-unmask-pwd').value = '';
+            document.getElementById('vault-unmask-modal').style.display = 'flex';
+        }
+
+        function closeVaultUnmaskModal() {
+            document.getElementById('vault-unmask-modal').style.display = 'none';
+        }
+
+        function submitVaultUnmaskModal() {
+            const filePath = document.getElementById('vault-unmask-path').value;
+            const pwd = document.getElementById('vault-unmask-pwd').value;
+            const errEl = document.getElementById('vault-unmask-err');
+
+            if (!pwd) {
+                errEl.innerText = "Master password required to unmask file.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            fetch('/api/vault/unmask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pwd, files: [filePath] })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success' && (!res.errors || res.errors.length === 0)) {
+                        showToast(`Unmasked file '${filePath}' successfully!`);
+                        closeVaultUnmaskModal();
+                        loadVaultStatus();
+                    } else {
+                        errEl.innerText = (res.errors && res.errors.length > 0) ? res.errors[0] : (res.message || "Unmasking failed.");
+                        errEl.style.display = 'block';
+                    }
+                });
+        }
     </script>
+
+    <!-- Command Profile Edit/Create Modal -->
+    <div id="profile-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; width: 520px; max-width: 90%; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h3 id="profile-modal-title"
+                style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Create Command Profile</h3>
+            <input type="hidden" id="profile-modal-editing-name" value="">
+            <div class="option-group">
+                <label class="option-label">Profile / Command Name</label>
+                <div class="option-desc">Custom subcommand name (e.g. <code>backend</code> for
+                    <code>archon backend</code>). Must be alphanumeric (no spaces).</div>
+                <input type="text" id="profile-modal-name" placeholder="e.g. backend" required>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Archon CLI Commands Sequence</label>
+                <div class="option-desc">Enter existing Archon CLI commands to execute in order (one command per line).
+                </div>
+                <textarea id="profile-modal-commands" rows="6"
+                    placeholder="archon analyze --architecture&#10;archon analyze --metrics&#10;archon export --html"
+                    style="font-family: monospace; font-size: 0.9rem; padding: 10px;"></textarea>
+            </div>
+            <div id="profile-modal-error"
+                style="color: var(--critical-color); font-size: 0.875rem; font-weight: 600; display: none;"></div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfileFromModal()">Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault Password Modal -->
+    <div id="vault-password-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; width: 450px; max-width: 90%; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h3 id="vault-pwd-title"
+                style="font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Vault Master Password</h3>
+            <div id="vault-pwd-old-group" class="option-group" style="display: none;">
+                <label class="option-label">Current Master Password</label>
+                <input type="password" id="vault-pwd-old" placeholder="Enter current master password">
+            </div>
+            <div class="option-group">
+                <label class="option-label">Master Password</label>
+                <div class="option-desc">Derived with scrypt. Never stored in plaintext.</div>
+                <input type="password" id="vault-pwd-new" placeholder="Enter master password">
+            </div>
+            <div id="vault-pwd-err"
+                style="color: var(--critical-color); font-size: 0.875rem; font-weight: 600; display: none;"></div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeVaultPasswordModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitVaultPasswordModal()">Save
+                    Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault Mask File Modal -->
+    <div id="vault-mask-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; width: 480px; max-width: 90%; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h3
+                style="font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Protect / Mask Sensitive Files</h3>
+            <div class="option-group">
+                <label class="option-label">File Paths to Encrypt (One per line)</label>
+                <div class="option-desc">Relative file paths in workspace (e.g., <code>.env</code>,
+                    <code>credentials.json</code>, <code>certs/server.pem</code>).</div>
+                <textarea id="vault-mask-files" rows="4" placeholder=".env&#10;credentials.json&#10;server.pem"
+                    style="font-family: monospace; font-size: 0.9rem; padding: 10px;"></textarea>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Master Password</label>
+                <input type="password" id="vault-mask-pwd" placeholder="Enter master password">
+            </div>
+            <div id="vault-mask-err"
+                style="color: var(--critical-color); font-size: 0.875rem; font-weight: 600; display: none;"></div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeVaultMaskModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitVaultMaskModal()">Mask & Encrypt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault Unmask File Modal -->
+    <div id="vault-unmask-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; width: 450px; max-width: 90%; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h3
+                style="font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Unmask Protected File</h3>
+            <div class="option-group">
+                <label class="option-label">Target Protected File</label>
+                <input type="text" id="vault-unmask-path" readonly style="background: var(--card-color);">
+            </div>
+            <div class="option-group">
+                <label class="option-label">Master Password</label>
+                <input type="password" id="vault-unmask-pwd" placeholder="Enter master password to decrypt">
+            </div>
+            <div id="vault-unmask-err"
+                style="color: var(--critical-color); font-size: 0.875rem; font-weight: 600; display: none;"></div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeVaultUnmaskModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitVaultUnmaskModal()">Unmask &
+                    Decrypt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Node Inspector Modal -->
+    <div id="kg-node-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div
+            style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; width: 520px; max-width: 90%; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.12);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                <h3 id="kg-node-title" style="font-size: 1.15rem; font-weight: 700; color: var(--text-color);">Node
+                    Details</h3>
+                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;"
+                    onclick="closeNodeInspector()">Close</button>
+            </div>
+            <div id="kg-node-content"
+                style="font-size: 0.9rem; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Node properties dynamically filled -->
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>

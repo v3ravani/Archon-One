@@ -35,16 +35,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             display: flex;
             height: 100vh;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
         }
 
         /* Sidebar navigation */
         .sidebar {
             width: 280px;
+            flex-shrink: 0;
             border-right: 1px solid var(--border-color);
             background-color: var(--card-color);
             display: flex;
             flex-direction: column;
             padding: 20px 0;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .brand {
@@ -98,32 +103,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             color: var(--bg-color);
         }
 
-        .nav-footer {
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
         /* Main Workspace */
         .main-workspace {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 100vh;
             position: relative;
             overflow: hidden;
+            background-color: var(--bg-color);
         }
 
         /* Header block */
         .header {
-            height: 80px;
+            height: 70px;
+            flex-shrink: 0;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 24px;
             background-color: var(--bg-color);
         }
 
@@ -155,40 +154,43 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         /* Content panels */
         .content {
             flex-grow: 1;
-            padding: 30px;
-            overflow-y: auto;
+            height: calc(100vh - 70px);
+            padding: 20px 24px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 16px;
+            box-sizing: border-box;
         }
 
         /* Summary Cards Grid */
         .summary-grid {
+            flex-shrink: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
         }
 
         .summary-card {
             background-color: var(--card-color);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 20px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .summary-card-title {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #6c757d;
             font-weight: 600;
             text-transform: uppercase;
         }
 
         .summary-card-value {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 700;
         }
 
@@ -206,6 +208,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         /* Table Card Container */
         .table-card {
+            flex-grow: 1;
+            min-height: 0;
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -215,7 +219,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         .table-card-header {
-            padding: 15px 20px;
+            flex-shrink: 0;
+            padding: 12px 18px;
             border-bottom: 1px solid var(--border-color);
             background-color: var(--card-color);
             display: flex;
@@ -235,6 +240,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         /* Interactive Tables */
         .table-responsive {
+            flex-grow: 1;
+            min-height: 0;
+            overflow-y: auto;
             overflow-x: auto;
             width: 100%;
         }
@@ -662,10 +670,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <ul class="nav-links" id="sections-nav">
             <!-- Populated dynamically via JS -->
         </ul>
-        <div class="nav-footer">
-            <a href="#" id="btn-prev-mod" class="btn btn-secondary btn-nav">← Previous Module</a>
-            <a href="#" id="btn-next-mod" class="btn btn-secondary btn-nav">Next Module →</a>
-        </div>
     </div>
 
     <!-- Main Workspace -->
@@ -697,7 +701,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         <button class="btn btn-secondary" onclick="exportData('csv')">CSV</button>
                         <button class="btn btn-secondary" onclick="exportData('json')">JSON</button>
                         <button class="btn btn-secondary" onclick="exportData('md')">MD</button>
-                        <button class="btn btn-secondary" onclick="toggleFullscreen()">Fullscreen</button>
+                        <button class="btn btn-secondary" id="btn-fullscreen" onclick="toggleFullscreen()">Fullscreen</button>
                     </div>
                 </div>
                 
@@ -713,12 +717,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 </div>
 
                 <!-- Pagination Footer -->
-                <div class="pagination-container">
-                    <div class="pagination-info" id="pagination-info">Showing 0 to 0 of 0 entries</div>
-                    <div class="pagination-buttons">
-                        <button class="btn btn-secondary" id="btn-prev-page" onclick="changePage(-1)">Previous</button>
-                        <button class="btn btn-secondary" id="btn-next-page" onclick="changePage(1)">Next</button>
-                    </div>
+                <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="pagination-info" id="pagination-info">Total: 0 entries</div>
                 </div>
             </div>
 
@@ -804,22 +804,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             document.getElementById('header-module-name').innerText = reportData.module_name;
             document.getElementById('header-repo-details').innerText = `Repository: ${reportData.repo_name} | Path: ${reportData.repo_path} | Scan Duration: ${reportData.duration}`;
             
-            // Set up Module navigation links
-            const prevBtn = document.getElementById('btn-prev-mod');
-            const nextBtn = document.getElementById('btn-next-mod');
-            if (reportData.navigation && reportData.navigation.prev) {
-                prevBtn.href = reportData.navigation.prev;
-                prevBtn.style.display = 'inline-flex';
-            } else {
-                prevBtn.style.display = 'none';
-            }
-            if (reportData.navigation && reportData.navigation.next) {
-                nextBtn.href = reportData.navigation.next;
-                nextBtn.style.display = 'inline-flex';
-            } else {
-                nextBtn.style.display = 'none';
-            }
-
             // Populated navigation sections
             const navContainer = document.getElementById('sections-nav');
             navContainer.innerHTML = "";
@@ -956,14 +940,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 const sec = reportData.sections.find(s => s.id === activeSectionId);
                 const cols = sec ? sec.headers.length : 1;
                 bodyContainer.innerHTML = `<tr><td colspan="${cols}" style="text-align: center; color: #6c757d;">No data available.</td></tr>`;
-                document.getElementById('pagination-info').innerText = "Showing 0 to 0 of 0 entries";
+                document.getElementById('pagination-info').innerText = "Total: 0 entries";
                 return;
             }
 
-            const startIdx = (currentPage - 1) * rowsPerPage;
-            const endIdx = Math.min(startIdx + rowsPerPage, filteredRows.length);
-
-            for (let i = startIdx; i < endIdx; i++) {
+            for (let i = 0; i < filteredRows.length; i++) {
                 const row = filteredRows[i];
                 const tr = document.createElement('tr');
                 if (i === selectedRowIndex) tr.className = 'selected';
@@ -983,7 +964,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 bodyContainer.appendChild(tr);
             }
 
-            document.getElementById('pagination-info').innerText = `Showing ${startIdx + 1} to ${endIdx} of ${filteredRows.length} entries`;
+            document.getElementById('pagination-info').innerText = `Total: ${filteredRows.length} entries`;
         }
 
         function handleSearch(val) {
@@ -1057,7 +1038,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function toggleFullscreen() {
             const container = document.getElementById('table-container');
-            container.classList.toggle('fullscreen-active');
+            const btn = document.getElementById('btn-fullscreen');
+            const isFull = container.classList.toggle('fullscreen-active');
+            if (btn) {
+                btn.innerText = isFull ? "Exit Fullscreen" : "Fullscreen";
+            }
         }
 
         function exportData(format) {

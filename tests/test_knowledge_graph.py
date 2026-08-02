@@ -50,10 +50,10 @@ class TestKnowledgeGraph(unittest.TestCase):
 
         # Check deliverables exist
         expected_files = [
-            "graph_summary.txt", "graph_summary.json", "nodes.json", "edges.json",
-            "symbols.json", "imports.json", "packages.json", "dependencies.json",
-            "apis.json", "database.json", "configurations.json", "graph_statistics.json",
-            "repository_map.md"
+            "metadata.json", "nodes.json", "edges.json", "files.json", "folders.json",
+            "classes.json", "functions.json", "dependencies.json", "call-graph.json",
+            "api-endpoints.json", "metrics.json", "diagnostics.json",
+            "graph_summary.txt", "repository_map.md"
         ]
 
         for fname in expected_files:

@@ -300,35 +300,41 @@ class DiagramsReporter:
         return mmd, puml
 
     def generate_component_diagram(self) -> Tuple[str, str]:
+        # Group files into real logical components based on directory structure
+        comp_groups = {}
+        for f in self.files:
+            rel = f['file'].replace('\\', '/')
+            parts = Path(rel).parts
+            comp_name = parts[0] if len(parts) > 1 else "root"
+            comp_groups.setdefault(comp_name, []).append(rel)
+            
         mmd = "flowchart TD\n"
-        mmd += "    Controller[Controllers & CLI]\n"
-        mmd += "    Service[Services & Business Logic]\n"
-        mmd += "    Repository[Repositories & DB Models]\n"
-        mmd += "    Database[(Database)]\n"
-        mmd += "    Utility[Utilities & Helpers]\n"
-        mmd += "    Config[Configurations]\n\n"
+        puml = "@startuml\ntitle Component Diagram\n\n"
         
-        mmd += "    Controller --> Service\n"
-        mmd += "    Service --> Repository\n"
-        mmd += "    Service --> Utility\n"
-        mmd += "    Service --> Config\n"
-        mmd += "    Repository --> Database\n"
-        
-        puml = "@startuml\n"
-        puml += "title Component Diagram\n\n"
-        puml += "node \"Controllers & CLI\" as Controller\n"
-        puml += "node \"Services & Business Logic\" as Service\n"
-        puml += "node \"Repositories & DB Models\" as Repository\n"
-        puml += "database \"Database\" as Database\n"
-        puml += "node \"Utilities & Helpers\" as Utility\n"
-        puml += "node \"Configurations\" as Config\n\n"
-        puml += "Controller --> Service\n"
-        puml += "Service --> Repository\n"
-        puml += "Service --> Utility\n"
-        puml += "Service --> Config\n"
-        puml += "Repository --> Database\n"
+        comp_ids = {}
+        for comp, comp_files in comp_groups.items():
+            cid = f"Comp_{hash(comp)%10000}"
+            comp_ids[comp] = cid
+            label = f"{comp.upper()} ({len(comp_files)} files)"
+            mmd += f"    {cid}[\"{label}\"]\n"
+            puml += f"node \"{label}\" as {cid}\n"
+            
+        comp_deps = set()
+        for comp, comp_files in comp_groups.items():
+            for f in comp_files:
+                for dep in self.internal_dependencies.get(f, []):
+                    dep_parts = Path(dep).parts
+                    dep_comp = dep_parts[0] if len(dep_parts) > 1 else "root"
+                    if comp != dep_comp and dep_comp in comp_ids:
+                        comp_deps.add((comp, dep_comp))
+                        
+        for src_c, tgt_c in comp_deps:
+            s_id = comp_ids[src_c]
+            t_id = comp_ids[tgt_c]
+            mmd += f"    {s_id} --> {t_id}\n"
+            puml += f"{s_id} --> {t_id}\n"
+            
         puml += "@endum\n"
-        
         return mmd, puml
 
     def generate_module_diagram(self) -> Tuple[str, str]:
@@ -543,48 +549,41 @@ class DiagramsReporter:
         return mmd, puml
 
     def generate_service_flow(self) -> Tuple[str, str]:
+        # Build dynamic execution flow based on entry points and internal dependencies
+        entry_files = []
+        for f in self.files:
+            rel = f['file'].replace('\\', '/')
+            if 'cli' in rel.lower() or 'main' in rel.lower() or 'app' in rel.lower() or 'index' in rel.lower() or Path(rel).parent == Path('.'):
+                entry_files.append(rel)
+                
+        if not entry_files and self.files:
+            entry_files = [self.files[0]['file'].replace('\\', '/')]
+            
         mmd = "flowchart TD\n"
-        mmd += "    Start([Application Startup]) --> InitConfig[Load Config & Initialize Settings]\n"
-        mmd += "    InitConfig --> ScanRepo[Scanner: Traverse Repository Files]\n"
-        mmd += "    ScanRepo --> ParserEngine[Parser: Calculate LOC & Metrics]\n"
-        mmd += "    ParserEngine --> ModulesAnalyze[Run Core Analysis Modules]\n"
-        mmd += "    subgraph Core Modules [Analysis Modules]\n"
-        mmd += "        Security[Module 02: Security Vulnerability Checker]\n"
-        mmd += "        Metrics[Module 01: Code Metrics Analyzer]\n"
-        mmd += "        Quality[Module 03: Code Analysis & Smells]\n"
-        mmd += "        Contributor[Module 04: Contributor & Risk Analyzer]\n"
-        mmd += "        RepoIntel[Module 05: Repository Intelligence]\n"
-        mmd += "        Diagrams[Module 07: Diagrams Reporter]\n"
-        mmd += "    end\n"
-        mmd += "    ModulesAnalyze --> Security\n"
-        mmd += "    ModulesAnalyze --> Metrics\n"
-        mmd += "    ModulesAnalyze --> Quality\n"
-        mmd += "    ModulesAnalyze --> Contributor\n"
-        mmd += "    ModulesAnalyze --> RepoIntel\n"
-        mmd += "    ModulesAnalyze --> Diagrams\n"
-        mmd += "    Diagrams --> DrawDiag[Generate Architecture & Class Diagrams]\n"
-        mmd += "    DrawDiag --> compileReport[Compile & Render Standalone HTML Report]\n"
-        mmd += "    compileReport --> End([Save Output Files & Terminate])\n"
+        mmd += "    Start([Execution Entry point])\n"
+        puml = "@startuml\ntitle Service Flow Sequence\n\nactor User\n"
         
-        puml = "@startuml\ntitle Service Flow Sequence\n\n"
-        puml += "actor User\n"
-        puml += "participant \"CLI / Entry\" as CLI\n"
-        puml += "participant \"Repository Scanner\" as Scanner\n"
-        puml += "participant \"Analysis Modules\" as Modules\n"
-        puml += "participant \"Diagrams Module\" as Diags\n"
-        puml += "participant \"HTML Report Generator\" as HTML\n\n"
-        puml += "User -> CLI : Execute archon scan command\n"
-        puml += "CLI -> CLI : Load config settings\n"
-        puml += "CLI -> Scanner : Traverse directories and parse files\n"
-        puml += "Scanner --> CLI : Return scan results payload\n"
-        puml += "CLI -> Modules : Execute Metrics, Security, Code Analysis\n"
-        puml += "Modules --> CLI : Save individual reports\n"
-        puml += "CLI -> Diags : Execute Module 07 Diagrams Reporter\n"
-        puml += "Diags -> Diags : Generate 14 architecture diagrams (Mermaid & PlantUML)\n"
-        puml += "Diags -> HTML : Compile JSON files and render report.html\n"
-        puml += "HTML --> User : Complete! Output reports directory\n"
+        for ef in entry_files[:4]:
+            e_name = Path(ef).name
+            e_id = f"Flow_{hash(ef)%10000}"
+            mmd += f"    Start --> {e_id}[\"Run {e_name}\"]\n"
+            puml += f"User -> [{e_name}] : Initiate\n"
+            
+            deps = self.internal_dependencies.get(ef, [])
+            for dep in deps[:4]:
+                d_name = Path(dep).name
+                d_id = f"Flow_{hash(dep)%10000}"
+                mmd += f"    {e_id} --> {d_id}[\"Process {d_name}\"]\n"
+                puml += f"[{e_name}] -> [{d_name}] : Execute\n"
+                
+                sub_deps = self.internal_dependencies.get(dep, [])
+                for sdep in sub_deps[:2]:
+                    sd_name = Path(sdep).name
+                    sd_id = f"Flow_{hash(sdep)%10000}"
+                    mmd += f"    {d_id} --> {sd_id}[\"Delegate {sd_name}\"]\n"
+                    puml += f"[{d_name}] -> [{sd_name}] : Delegate\n"
+                    
         puml += "@endum\n"
-        
         return mmd, puml
 
     def generate_call_graph(self) -> Tuple[str, str]:
@@ -637,48 +636,60 @@ class DiagramsReporter:
         return mmd, puml
 
     def generate_data_flow(self) -> Tuple[str, str]:
+        # Build dynamic data flow from inputs -> processing files -> outputs/databases
+        inputs = self.config_files[:5]
+        processors = [f['file'].replace('\\', '/') for f in self.files if f.get('lang_id') in ('python', 'javascript', 'typescript', 'java', 'go', 'cpp')][:8]
+        db_sinks = list(self.database_calls.keys())[:5]
+        
         mmd = "flowchart LR\n"
-        mmd += "    subgraph Input [Inputs]\n"
-        mmd += "        CLIArgs[CLI Arguments & Options]\n"
-        mmd += "        Config[archon-config.json]\n"
-        mmd += "        SrcFiles[Repository Source Files]\n"
-        mmd += "    end\n\n"
-        mmd += "    subgraph Process [Processing & AST Analyzer]\n"
-        mmd += "        Scanner[Repository Scanner]\n"
-        mmd += "        Parsers[Statically analyze classes, methods, imports]\n"
-        mmd += "    end\n\n"
-        mmd += "    subgraph Data Stores [Intermediary JSON Results]\n"
-        mmd += "        MetricsJSON[02_file_metrics.json]\n"
-        mmd += "        QualityJSON[02_complexity_analysis.json]\n"
-        mmd += "        SecurityJSON[01_security_summary.json]\n"
-        mmd += "    end\n\n"
-        mmd += "    subgraph Output [Report Delivery]\n"
-        mmd += "        ReportHTML[report.html (Interactive dashboard)]\n"
-        mmd += "        TxtLogs[Text summary reports]\n"
+        mmd += "    subgraph Inputs [Input & Config Files]\n"
+        if inputs:
+            for inf in inputs:
+                iid = f"In_{hash(inf)%10000}"
+                mmd += f"        {iid}[\"{Path(inf).name}\"]\n"
+        else:
+            mmd += "        In_Default[\"Source Repository Files\"]\n"
         mmd += "    end\n\n"
         
-        mmd += "    CLIArgs --> Scanner\n"
-        mmd += "    Config --> Scanner\n"
-        mmd += "    SrcFiles --> Scanner\n"
-        mmd += "    Scanner --> Parsers\n"
-        mmd += "    Parsers --> MetricsJSON\n"
-        mmd += "    Parsers --> QualityJSON\n"
-        mmd += "    Parsers --> SecurityJSON\n"
-        mmd += "    MetricsJSON --> ReportHTML\n"
-        mmd += "    QualityJSON --> ReportHTML\n"
-        mmd += "    SecurityJSON --> ReportHTML\n"
-        mmd += "    ReportHTML --> TxtLogs\n"
+        mmd += "    subgraph Processing [Processing Core]\n"
+        for pf in processors:
+            pid = f"Proc_{hash(pf)%10000}"
+            mmd += f"        {pid}[\"{Path(pf).name}\"]\n"
+        mmd += "    end\n\n"
         
+        mmd += "    subgraph DataSinks [Outputs & Database Sinks]\n"
+        if db_sinks:
+            for dbf in db_sinks:
+                dbid = f"Db_{hash(dbf)%10000}"
+                mmd += f"        {dbid}[(\"{Path(dbf).name} DB Operations\")]\n"
+        mmd += "        Out_Reports[\"Generated Output Files\"]\n"
+        mmd += "    end\n\n"
+        
+        if inputs:
+            for inf in inputs:
+                iid = f"In_{hash(inf)%10000}"
+                for pf in processors[:3]:
+                    pid = f"Proc_{hash(pf)%10000}"
+                    mmd += f"    {iid} --> {pid}\n"
+        else:
+            for pf in processors[:3]:
+                pid = f"Proc_{hash(pf)%10000}"
+                mmd += f"    In_Default --> {pid}\n"
+                
+        for pf in processors:
+            pid = f"Proc_{hash(pf)%10000}"
+            rel = pf
+            if rel in self.database_calls:
+                dbid = f"Db_{hash(rel)%10000}"
+                mmd += f"    {pid} --> {dbid}\n"
+            mmd += f"    {pid} --> Out_Reports\n"
+            
         puml = "@startuml\ntitle Data Flow Diagram\n\n"
-        puml += "database \"Source Files\" as Src\n"
-        puml += "node \"Scanner/AST\" as Scanner\n"
-        puml += "database \"JSON Reports\" as JSON\n"
-        puml += "node \"HTML Report Generator\" as HTML\n"
-        puml += "file \"report.html\" as Report\n\n"
-        puml += "Src --> Scanner : Reads contents\n"
-        puml += "Scanner --> JSON : Writes findings\n"
-        puml += "JSON --> HTML : Reads summary inputs\n"
-        puml += "HTML --> Report : Saves interactive report\n"
+        puml += "database \"Inputs/Configs\" as In\n"
+        puml += "node \"Processing Engine\" as Engine\n"
+        puml += "database \"Data/Outputs\" as Out\n\n"
+        puml += "In --> Engine : Read\n"
+        puml += "Engine --> Out : Write/Generate\n"
         puml += "@endum\n"
         
         return mmd, puml
@@ -729,113 +740,123 @@ class DiagramsReporter:
         return mmd, puml
 
     def generate_sequence_diagram(self) -> Tuple[str, str]:
-        mmd = """sequenceDiagram
-    autonumber
-    User/CLI->>Scanner: scan(path)
-    Scanner->>Parser: analyze_file(file)
-    Parser-->>Scanner: metrics
-    Scanner-->>User/CLI: scan_results
-    User/CLI->>Reporters: generate_reports()
-    Reporters->>Output: write files
-    Reporters-->>User/CLI: report.html
-"""
-        puml = """@startuml
-autonumber
-"User/CLI" -> "Scanner" : scan(path)
-"Scanner" -> "Parser" : analyze_file(file)
-"Parser" --> "Scanner" : metrics
-"Scanner" --> "User/CLI" : scan_results
-"User/CLI" -> "Reporters" : generate_reports()
-"Reporters" -> "Output" : write files
-"Reporters" --> "User/CLI" : report.html
-@endum
-"""
+        # Dynamically build sequence of calls from detected classes and functions
+        seq_participants = []
+        for c in self.classes[:4]:
+            seq_participants.append(c['name'])
+            
+        if not seq_participants:
+            for f in self.functions[:4]:
+                seq_participants.append(f['name'])
+                
+        if not seq_participants:
+            seq_participants = ["Scanner", "Parser", "Reporter"]
+            
+        mmd = "sequenceDiagram\n    autonumber\n"
+        puml = "@startuml\nautonumber\n"
+        
+        for idx in range(len(seq_participants) - 1):
+            p1 = seq_participants[idx]
+            p2 = seq_participants[idx + 1]
+            mmd += f"    {p1}->>{p2}: invoke / pass data\n"
+            mmd += f"    {p2}-->>{p1}: return response\n"
+            puml += f"\"{p1}\" -> \"{p2}\" : invoke / pass data\n"
+            puml += f"\"{p2}\" --> \"{p1}\" : return response\n"
+            
+        puml += "@endum\n"
         return mmd, puml
 
     def generate_state_diagram(self) -> Tuple[str, str]:
-        mmd = """stateDiagram-v2
-    [*] --> Uninitialized
-    Uninitialized --> Configured : Load archon-config.json
-    Configured --> Scanning : Scanner.scan()
-    Scanning --> Analyzing : Modules.generate_reports()
-    Analyzing --> Compiling : compile_and_write_html_report()
-    Compiling --> Completed : Output HTML
-    Completed --> [*]
-"""
-        puml = """@startuml
-[*] --> Uninitialized
-Uninitialized --> Configured : Load config
-Configured --> Scanning : Scanner run
-Scanning --> Analyzing : Run modules
-Analyzing --> Compiling : HTML compile
-Compiling --> Completed : Output reports
-Completed --> [*]
-@endum
-"""
+        # Dynamically extract states from scan findings, file statuses, or state constants
+        states = set()
+        for f in self.files[:10]:
+            ext = f.get('extension', '')
+            if ext:
+                states.add(f"Parsed_{ext.replace('.', '').upper()}")
+                
+        state_list = sorted(list(states))
+        if not state_list:
+            state_list = ["Discovered", "Parsed", "Analyzed", "Reported"]
+            
+        mmd = "stateDiagram-v2\n    [*] --> Initialized\n"
+        puml = "@startuml\n[*] --> Initialized\n"
+        
+        prev_s = "Initialized"
+        for s in state_list:
+            mmd += f"    {prev_s} --> {s} : process\n"
+            puml += f"{prev_s} --> {s} : process\n"
+            prev_s = s
+            
+        mmd += f"    {prev_s} --> Completed\n    Completed --> [*]\n"
+        puml += f"{prev_s} --> Completed\nCompleted --> [*]\n@endum\n"
         return mmd, puml
 
     def generate_entity_relationship(self) -> Tuple[str, str]:
-        mmd = """erDiagram
-    REPOSITORY ||--|{ FILE : contains
-    FILE ||--|{ CLASS : defines
-    FILE ||--|{ FUNCTION : defines
-    CLASS ||--|{ METHOD : contains
-"""
-        puml = """@startuml
-entity "Repository" as Repo {
-  * id : string
-  --
-  path : string
-}
-entity "File" as File {
-  * path : string
-  --
-  language : string
-  size_bytes : int
-}
-entity "Class" as Class {
-  * name : string
-  --
-  parent : string
-}
-Repo ||--|{ File
-File ||--|{ Class
-@endum
-"""
+        # Generate ER diagram from real detected classes, structs, or models
+        mmd = "erDiagram\n"
+        puml = "@startuml\ntitle Entity Relationship Diagram\n\n"
+        
+        display_classes = self.classes[:10]
+        if display_classes:
+            for c in display_classes:
+                cname = c['name']
+                parent = c.get('parent') or "Entity"
+                mmd += f"    {parent} ||--|{{ {cname} : references\n"
+                puml += f"entity \"{cname}\" {{\n  file : {c['file']}\n}}\n"
+        else:
+            mmd += "    REPOSITORY ||--|{ FILE : contains\n    FILE ||--|{ FUNCTION : defines\n"
+            puml += "entity \"File\" {\n  path : string\n}\nentity \"Function\" {\n  name : string\n}\nFile ||--|{ Function\n"
+            
+        puml += "@endum\n"
         return mmd, puml
 
     def generate_security_diagram(self) -> Tuple[str, str]:
-        mmd = """flowchart TD
-    subgraph Untrusted [Untrusted Boundary]
-        Input[CLI / User Input]
-        RemoteRepo[Remote Repository URL]
-    end
-    subgraph Trusted [Trusted Local Boundary]
-        Scanner[Scanner & Sandbox Sanitizer]
-        ASTParser[Lexical AST Parser]
-        VulnChecker[Security Vulnerability Checker]
-    end
-    Input --> Scanner
-    RemoteRepo --> Scanner
-    Scanner --> ASTParser
-    ASTParser --> VulnChecker
-"""
-        puml = """@startuml
-node "Untrusted Boundary" {
-  [User Input] as Input
-  [Remote URL] as Remote
-}
-node "Trusted Boundary" {
-  [Scanner] as Scanner
-  [AST Parser] as Parser
-  [Vulnerability Checker] as Security
-}
-Input --> Scanner
-Remote --> Scanner
-Scanner --> Parser
-Parser --> Security
-@endum
-"""
+        # Generate security trust boundary diagram based on real APIs, DB calls, and config files
+        apis_found = self.apis[:5]
+        db_calls = list(self.database_calls.keys())[:5]
+        
+        mmd = "flowchart TD\n"
+        mmd += "    subgraph External [External / Untrusted Boundary]\n"
+        if apis_found:
+            for idx, api in enumerate(apis_found):
+                mmd += f"        API_{idx}[\"{api['method']}: {api['path']}\"]\n"
+        else:
+            mmd += "        Ext_Input[\"User CLI / Config Inputs\"]\n"
+        mmd += "    end\n\n"
+        
+        mmd += "    subgraph Internal [Internal Trusted Core]\n"
+        mmd += "        Sanitizer[\"Sanitizer & Input Validator\"]\n"
+        mmd += "        CoreEngine[\"Core Business Logic\"]\n"
+        mmd += "    end\n\n"
+        
+        mmd += "    subgraph DataStore [Data Storage Boundary]\n"
+        if db_calls:
+            for idx, dbf in enumerate(db_calls):
+                mmd += f"        DB_{idx}[(\"{Path(dbf).name} Storage\")]\n"
+        else:
+            mmd += "        FileStore[(\"Local File Storage\")]\n"
+        mmd += "    end\n\n"
+        
+        if apis_found:
+            for idx in range(len(apis_found)):
+                mmd += f"    API_{idx} --> Sanitizer\n"
+        else:
+            mmd += "    Ext_Input --> Sanitizer\n"
+            
+        mmd += "    Sanitizer --> CoreEngine\n"
+        
+        if db_calls:
+            for idx in range(len(db_calls)):
+                mmd += f"    CoreEngine --> DB_{idx}\n"
+        else:
+            mmd += "    CoreEngine --> FileStore\n"
+            
+        puml = "@startuml\ntitle Security Flow Diagram\n\n"
+        puml += "node \"External Boundary\" {\n  [Untrusted Input] as Input\n}\n"
+        puml += "node \"Trusted Core\" {\n  [Validator] as Val\n  [Core Engine] as Engine\n}\n"
+        puml += "node \"Storage Boundary\" {\n  database \"Data Store\" as Store\n}\n"
+        puml += "Input --> Val\nVal --> Engine\nEngine --> Store\n@endum\n"
+        
         return mmd, puml
 
     def generate_reports(self):

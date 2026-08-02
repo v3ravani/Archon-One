@@ -23,3 +23,9 @@ test_reports/
 test_settings_workspace/
 test_custom_output_dir/
 test_contributor_reports/
+test_vault_workspace/
+
+# Local Secret Vault & Configuration
+archon-vault.json
+archon-config.json
+*.masked

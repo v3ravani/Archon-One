@@ -143,6 +143,9 @@ class SecurityReporter:
         self._report_08_configuration_security()
         self._report_09_sensitive_files()
         self._report_10_scan_metadata()
+        self._report_11_sql_injection_audit()
+        self._report_12_network_infrastructure_smells()
+        self._report_13_api_security_audit()
         
         # Generate summary last as it collects statistics
         self._report_01_summary()
@@ -251,6 +254,9 @@ class SecurityReporter:
             self._scan_additional_globals_on_line(file_path, idx, stripped_line)
             self._scan_logging_security_on_line(file_path, idx, stripped_line)
             self._scan_unsafe_file_operations_on_line(file_path, idx, stripped_line)
+            self._scan_sql_injection_on_line(file_path, idx, stripped_line, ext)
+            self._scan_network_infrastructure_on_line(file_path, idx, stripped_line)
+            self._scan_api_security_on_line(file_path, idx, stripped_line)
 
     def _scan_multiline_secrets(self, file_path: str, content: str):
         # Private Keys
@@ -1575,3 +1581,66 @@ class SecurityReporter:
                     recommendation="Use path library utilities (e.g. pathlib.Path.joinpath or os.path.join) rather than string additions to protect against directory traversals.",
                     line_content=line
                 ))
+
+    def _scan_sql_injection_on_line(self, file_path: str, line_num: int, line: str, ext: str):
+        line_lower = line.lower()
+        if any(kw in line_lower for kw in ('select ', 'insert into', 'update ', 'delete from', 'where ')):
+            if any(p in line for p in (f'f"', f"f'", '%s', '.format(', ' + ', '${')):
+                if any(exec_kw in line_lower for kw in ('execute', 'query', 'raw', 'cursor', 'db.')):
+                    self.findings.append(Finding(
+                        file=file_path, line=line_num, severity="High", category="SQL Injection Audit",
+                        issue_type="Dynamic SQL Construction", matched_pattern="Dynamic SQL Query", masked_value="...",
+                        recommendation="Use parameterized queries / prepared statements instead of dynamic string concatenation/formatting in SQL queries.",
+                        line_content=line
+                    ))
+
+    def _scan_network_infrastructure_on_line(self, file_path: str, line_num: int, line: str):
+        line_lower = line.lower()
+        if '0.0.0.0' in line:
+            self.findings.append(Finding(
+                file=file_path, line=line_num, severity="Medium", category="Network & Infrastructure Smells",
+                issue_type="Global Network Interface Bind", matched_pattern="0.0.0.0", masked_value="...",
+                recommendation="Binding sockets to 0.0.0.0 exposes the service on all network interfaces. Bind to 127.0.0.1 or explicit IP address if internal.",
+                line_content=line
+            ))
+        if 'verify=false' in line_lower or 'rejectunauthorized: false' in line_lower or 'insecureskipverify: true' in line_lower:
+            self.findings.append(Finding(
+                file=file_path, line=line_num, severity="High", category="Network & Infrastructure Smells",
+                issue_type="Disabled TLS Verification", matched_pattern="TLS Disabled", masked_value="...",
+                recommendation="Do not disable SSL/TLS certificate verification in network calls to prevent Man-in-the-Middle (MitM) attacks.",
+                line_content=line
+            ))
+
+    def _scan_api_security_on_line(self, file_path: str, line_num: int, line: str):
+        line_lower = line.lower()
+        if 'access-control-allow-origin' in line_lower and '*' in line:
+            self.findings.append(Finding(
+                file=file_path, line=line_num, severity="Medium", category="API & Endpoint Security",
+                issue_type="CORS Wildcard Allowed", matched_pattern="Access-Control-Allow-Origin: *", masked_value="...",
+                recommendation="Avoid allowing all origins ('*') in CORS configurations for sensitive API routes.",
+                line_content=line
+            ))
+
+    def _report_11_sql_injection_audit(self):
+        sql_findings = [f.to_dict() for f in self.findings if f.category == "SQL Injection Audit"]
+        txt = "=========================================\nSQL INJECTION AUDIT REPORT\n=========================================\n\n"
+        txt += f"Total SQL Injection Risks Found: {len(sql_findings)}\n\n"
+        rows = [[f['file'], f['line'], f['severity'], f['issue_type']] for f in sql_findings]
+        txt += tabulate(rows, headers=["File", "Line", "Severity", "Issue Type"], tablefmt="grid")
+        self._write_files("11_sql_injection_audit", txt, {"sql_injection_findings": sql_findings})
+
+    def _report_12_network_infrastructure_smells(self):
+        net_findings = [f.to_dict() for f in self.findings if f.category == "Network & Infrastructure Smells"]
+        txt = "=========================================\nNETWORK & INFRASTRUCTURE SMELLS REPORT\n=========================================\n\n"
+        txt += f"Total Network Smells Found: {len(net_findings)}\n\n"
+        rows = [[f['file'], f['line'], f['severity'], f['issue_type']] for f in net_findings]
+        txt += tabulate(rows, headers=["File", "Line", "Severity", "Issue Type"], tablefmt="grid")
+        self._write_files("12_network_infrastructure_smells", txt, {"network_infrastructure_findings": net_findings})
+
+    def _report_13_api_security_audit(self):
+        api_findings = [f.to_dict() for f in self.findings if f.category == "API & Endpoint Security"]
+        txt = "=========================================\nAPI & ENDPOINT SECURITY AUDIT REPORT\n=========================================\n\n"
+        txt += f"Total API Security Issues Found: {len(api_findings)}\n\n"
+        rows = [[f['file'], f['line'], f['severity'], f['issue_type']] for f in api_findings]
+        txt += tabulate(rows, headers=["File", "Line", "Severity", "Issue Type"], tablefmt="grid")
+        self._write_files("13_api_security_audit", txt, {"api_security_findings": api_findings})

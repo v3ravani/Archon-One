@@ -81,10 +81,15 @@ Modern software development depends on cloud-based code analysis, security scann
 ---
 
 ## 4. Key Features
-- **Lexical Parser**: Distinguishes code from comments, block docstrings, and strings across 15+ languages.
-- **Vulnerability Checks**: Audits hardcoded secrets, weak cryptographic functions, unsafe configurations, and insecure APIs.
-- **Structure Metrics**: Maps cyclomatic complexity, cognitive nesting depth, duplications, and circular references.
-- **Unified HTML Viewer**: Combines individual reports into a single, offline-first HTML page featuring interactive search-hit badges.
+- **Multi-Language Lexical & AST Parser**: Distinguishes code from comments, docstrings, and string literals across 17+ languages (Python, Java, Go, Rust, C++, C, JavaScript, TypeScript, PHP, Kotlin, Dart, HTML, CSS, XML, JSON, YAML, Markdown).
+- **Comprehensive Vulnerability & Security Checks**: Audits hardcoded secrets, weak cryptography, unsafe functions, SQL injections, network exposure (`0.0.0.0`), CORS wildcard headers, and TLS bypasses.
+- **Advanced Code & Structural Analysis**: Evaluates cyclomatic complexity, cognitive nesting depth, naming conventions, recursive call depths, memory/descriptor leaks, concurrency risks, God methods/classes, and circular dependency chains.
+- **Untested Files & Coverage Gap Analysis**: Cross-references source code against test suites across Python, Java, Go, Rust, TS/JS, and C++ to compute test coverage gaps.
+- **Fast Scan & Incremental Hashing Engine**: Cryptographic file signature fingerprinting ($\text{MD5}(path:size:mtime)$) that reuses cache for unchanged files, accelerating re-scans by up to 10x.
+- **Interactive Web Settings & Feature Documentation Manual**: Offline dashboard with a dedicated sequential **Feature Documentation & Calculation Mechanics Manual** detailing exact mathematical formulas ($CC = E - N + 2P$, $MI$, $MD5$, $scrypt$, $AES-256-GCM$), AST rules, parameter tables, and severity classifications.
+- **Command Profiles Manager**: Define and manage custom CLI command shortcuts (`archon <profile_name>`) from the Web Dashboard or CLI to execute pre-saved sequences of Archon CLI commands.
+- **Secret Vault File Protection**: Zero-trust client-side file encryption (`archon vault`) using **AES-256-GCM** authenticated cipher and **scrypt** key derivation to secure sensitive workspace files (`.env`, `credentials.json`, `*.pem`).
+- **Unified Interactive HTML Viewer**: Compiles individual module reports into a single, standalone offline `index.html` report with search-hit badges, column sorting, SVG zoom/pan, and CSV/JSON/MD exports.
 
 ---
 
@@ -203,16 +208,54 @@ archon scan
 
 ## 10. CLI Commands
 
-| Command | Description | Arguments | Options | Example |
-|---|---|---|---|---|
-| `archon scan` | Scan repository | `[project_path]` | `-o`, `--output` | `archon scan -o C:\Reports` |
-| `archon graph` | Generate Knowledge Graph | `[project_path]` | `-o`, `--output` | `archon graph -o C:\Reports` |
-| `archon git` | Clone remote GitHub repo and scan | `<repo_url>` | `-o`, `--output` | `archon git https://github.com/user/repo.git` |
-| `archon report` | Compile to unified HTML | `[scan_path]` | None | `archon report archon-one/latest` |
-| `archon config` | Start Settings server | None | `--port` | `archon config --port 8085` |
-| `archon config reset` | Reset config to default | None | None | `archon config reset` |
-| `archon help` | Display runner guide | None | None | `archon help` |
-| `archon about` | Print developer details | None | None | `archon about` |
+| Command | Description | Options / Arguments | Example |
+|---|---|---|---|
+| `archon scan` | Scan codebase for metrics, security, maintainability, & intelligence (excl. graph) | `[project_path]`, `-s`/`--source`, `-o`/`--output`, `-g`/`--github` | `archon scan -s ./src -o ./reports -g https://github.com/user/repo` |
+| `archon graph` | Generate 12-file Knowledge Graph schema & repository map | `[project_path]`, `-s`/`--source`, `-o`/`--output`, `-g`/`--github` | `archon graph -g https://github.com/user/repo` |
+| `archon diagrams` | Generate 14 architecture diagrams (Mermaid/SVG/PNG) | `[project_path]`, `-s`/`--source`, `-o`/`--output`, `-g`/`--github` | `archon diagrams -s ./src` |
+| `archon report` | Compile scan results into single interactive HTML report | `[scan_path]` | `archon report archon-one/2026-07-31_21-45-11` |
+| `archon config` | Launch Web Settings & Intelligence Dashboard | `--port` | `archon config --port 8085` |
+| `archon reset` | Reset configuration to factory defaults | None | `archon reset` |
+| `archon profiles` | List configured Command Profiles | None | `archon profiles` |
+| `archon vault status` | Check Secret Vault protection status | None | `archon vault status` |
+| `archon vault mask` | Encrypt a sensitive file with AES-256-GCM | `<file_path>` | `archon vault mask .env` |
+| `archon vault unmask` | Decrypt a protected file | `<file_path>` | `archon vault unmask .env` |
+| `archon vault change-password` | Update master password and re-encrypt files | None | `archon vault change-password` |
+| `archon <profile_name>` | Execute saved Command Profile sequence | None | `archon backend` |
+| `archon help` | Display runner guide | None | `archon help` |
+| `archon about` | Print developer & version details | None | `archon about` |
+
+### Secret Vault CLI Usage
+Secret Vault protects sensitive environment and credential files using AES-256-GCM authenticated encryption and scrypt key derivation.
+
+```bash
+# Encrypt and mask a sensitive file
+archon vault mask .env
+
+# Display vault status and list of protected files
+archon vault status
+
+# Decrypt and unmask a protected file
+archon vault unmask .env
+
+# Change master password and re-encrypt all protected files
+archon vault change-password
+```
+
+### Command Profiles CLI Execution
+When a user defines a command profile in the Web Dashboard (or `archon-config.json`), Archon registers it as a dynamic command.
+
+Example:
+If profile `backend` is saved with:
+- `archon analyze --architecture`
+- `archon analyze --metrics`
+- `archon export --html`
+
+Running:
+```bash
+archon backend
+```
+Executes each command in sequence with terminal status headers and clean error handling.
 
 ---
 
@@ -260,7 +303,20 @@ archon-one/
     ├── 06_knowledge_graph/
     │   ├── graph_summary.txt
     │   ├── graph_summary.json
-    │   └── repository_map.md
+    │   ├── repository_map.md
+    │   └── knowledge-graph/
+    │       ├── metadata.json
+    │       ├── nodes.json
+    │       ├── edges.json
+    │       ├── files.json
+    │       ├── folders.json
+    │       ├── classes.json
+    │       ├── functions.json
+    │       ├── dependencies.json
+    │       ├── call-graph.json
+    │       ├── api-endpoints.json
+    │       ├── metrics.json
+    │       └── diagnostics.json
 ```
 
 ---
@@ -285,16 +341,22 @@ Each module folder includes `report.html` which is completely standalone and wor
 ---
 
 ## 15. Settings Manager
-Run `archon config` to launch the offline dashboard page at `http://localhost:8085`. It divides settings into 10 configurations:
-- **General**: Project name, Output Folder, Timestamp preferences, and Scan paths.
-- **Scan Modules**: Enable/disable metrics, security, complexity, or contributor trackers.
-- **Output**: Formats selection (TXT, JSON, MD, HTML), tables mode, and row limits.
-- **Ignore Rules**: Directories, Extensions, Max sizes, and Binary filters.
-- **Thresholds**: Cyclomatic complexity, max parameters, imports limits, and comments density.
-- **Security**: Severities bounds, secrets bounds, and scanning patterns.
-- **Performance**: Thread pools size, memory usage boundaries, and file caching limits.
-- **Advanced**: Logging levels, validation checks, and automatic logs cleanup.
-- **About**: System version details.
+Run `archon config` to launch the offline Web Settings & Intelligence Dashboard at `http://localhost:8085`. It features a responsive sidebar menu organizing configuration options and intelligence guides into 14 dedicated pages:
+
+1. **General**: Project name, Output folder path (supports relative or absolute paths), timestamped folder preferences, and scan history bounds.
+2. **Feature Documentation**: Comprehensive, offline engineering reference manual detailing exact calculation formulas ($CC = E - N + 2P$, Maintainability Index $MI$, Technical Debt, $MD5$ file fingerprints, $scrypt$ KDF, AES-256-GCM), step-by-step calculation workflows, parameter tables, and severity classifications for all 18 core system features.
+3. **Scan Modules**: Enable or disable Module 01 (Code Metrics), Module 02 (Security), Module 03 (Code Analysis), Module 04 (Contributor Analysis), Module 05 (Repository Intelligence), and Module 06 (Knowledge Graph).
+4. **Output Options**: Select export formats (TXT, JSON, MD, HTML), table layout styles (ASCII/Unicode), sort order, and maximum row limits per report.
+5. **Ignore Rules**: Define custom folder ignore lists (`node_modules`, `.git`, `venv`, `dist`), file extensions, hidden files/directories toggles, binary filters, and maximum file size bounds.
+6. **Thresholds**: Adjust warning and critical boundaries for cyclomatic complexity, cognitive complexity, function length, class length, parameter counts, duplication tolerances, and maintainability index floors.
+7. **Security Rules**: Set minimum severity cutoffs (Critical, High, Medium, Low), toggle secret scanning, insecure function detection, SQL injection checks, network exposure audits, and CORS wildcard flags.
+8. **Knowledge Graph**: Customise graph entity inclusion toggles (Classes, Functions, Dependencies, APIs, Database tables, Configurations) and set maximum traversal depth ($1 \dots 50$).
+9. **Performance**: Configure multi-threaded worker pools ($1 \dots 32$), memory limits, cache size, **Fast Scan Mode** (optimized line stream parsing), and **Incremental Scan Mode** (reuses cached metrics for unchanged file signatures).
+10. **Advanced**: Toggle debug logging, verbose execution outputs, configuration schema validation, and automated historical report cleanup.
+11. **Command Profiles**: Create, edit, delete, export, and import custom command shortcuts (`archon <profile_name>`) that execute pre-configured CLI command sequences in order.
+12. **Secret Vault**: Client-side **AES-256-GCM** file encryption management. Set or update master passwords, mask/unmask sensitive workspace files (`.env`, `credentials.json`, `*.pem`), and review vault status.
+13. **CLI Commands Guide**: Quick reference syntax manual detailing CLI flags, command arguments, and example usage for all Archon commands.
+14. **About Archon**: Version info, license details, and developer attribution (Viraj Ravani).
 
 ---
 
@@ -316,6 +378,13 @@ Configure scanner rules inside `archon-config.json` placed in your repository ro
     "enable_scan_summary": true,
     "max_scan_history": 10,
     "language_detection": "auto"
+  },
+  "profiles": {
+    "backend": [
+      "archon analyze --architecture",
+      "archon analyze --metrics",
+      "archon export --html"
+    ]
   },
   "modules": {
     "code_metrics": true,
@@ -428,33 +497,158 @@ Configure scanner rules inside `archon-config.json` placed in your repository ro
 ## 17. Module Documentation
 
 ### Module 01: Code Metrics
-Computes lines of code (LOC), file sizes, language volumes, comment density, and directory complexity.
-- **Workflow**: Traverses files, detects format, and executes lexical comment parsing.
-- **Algorithms**: Stateful comment tokenizers matching multi-line and single-line syntax.
-- **Generated Reports**: Repository Summary, File Metrics, Directory Metrics, Language Metrics, Documentation Coverage, Extension Metrics, Size Analysis, Project Structure, Scan Statistics, Metadata, Dependencies.
+### Module 01: Code Metrics
+Computes lines of code (LOC), file sizes, language volumes, comment density, directory complexity, and test coverage gap ratios.
+- **Workflow**: Traverses files, detects format, and executes lexical comment parsing across 17+ programming languages.
+- **Algorithms**: Stateful comment tokenizers matching multi-line and single-line syntax, file size band aggregators, and cross-file test suite mapping.
+- **Generated Reports**: Repository Summary (`01`), File Metrics (`02`), Directory Metrics (`03`), Language Metrics (`04`), Documentation Coverage (`05`), Extension Metrics (`06`), Size Analysis (`07`), Project Structure (`08`), Scan Statistics (`09`), Metadata (`10`), Dependencies (`11`), **Untested Files & Coverage Gap Analysis** (`12`).
 
 ### Module 02: Security
-Audits repositories for private keys, vulnerabilities, credentials, and misconfigurations.
-- **Workflow**: Performs line-by-line checks against regular expression rulesets and insecure method indices.
-- **Vulnerabilities detected**: Committed SSH keys, AWS tokens, hardcoded IP configurations, weak crypto hashing, dangerous functions (e.g. `eval`), hardcoded Authorization headers/tokens, and XML External Entity (XXE) vulnerabilities.
-- **Production-Grade Security Features**:
-  1. **License Compliance Scanner**: Detects license files and matches GPL, LGPL, AGPL, MIT, Apache, BSD, and Proprietary keywords to warn about commercial copyleft compatibility.
-  2. **File Permission Audit**: Analyzes file permission flags for world-writable scripts or incorrect execution flags on scripts (`.sh`, `.py`).
-  3. **Sensitive File Detector**: Scans repository path structures for committed environment configuration keys (`.env`, `.env.production`), certificates, databases, and configuration backups (`id_rsa`, `id_ed25519`, `.pem`, `.p12`, `.keystore`, `credentials.json`, `firebase-admin.json`, `aws-credentials`, `docker-compose.override.yml`).
-  4. **Docker & Container Security Scan**: Evaluates container layouts (`Dockerfile`, `docker-compose.yml`) for exposed base tags, missing HEALTHCHECK tags, privileged container settings, or root executing permissions.
-  5. **CI/CD Security Scanner**: Scans GitHub Actions pipelines (`.github/workflows/`), GitLab CI configuration, or Azure pipelines workflows for plaintext secrets or unpinned workflows.
-  6. **Git Ignore Security Audit**: Compares active repository file extensions against `.gitignore` to alert on tracked configurations or credentials.
-  7. **Logging Security Analysis**: Flags logger output lines (`logger.info`, `console.log`) containing variable references to passwords, tokens, hashes, or credentials to prevent leaks.
-  8. **Unsafe File Operation Detection**: Detects potentially vulnerable filesystem paths or calls (recursive directories wipe, path string concatenation vulnerabilities).
-  9. **Security Best Practices Audit**: Inspects the workspace root for missing lock files, license declarations, environment configs, or gitignore specifications.
-  10. **Cryptographic Key Detection**: Audits and classifies committed public, private, or certificate keys (`-----BEGIN ... KEY-----` or `-----BEGIN CERTIFICATE-----`).
-- **Reports**: Summary, Secrets, Credentials, Insecure Functions, Web Security, Cryptography Checks, Dependency Vulnerabilities, Configurations, Sensitive Files, Metadata.
+Audits repositories for private keys, credentials, misconfigurations, dynamic SQL injections, network exposure, and CORS security risks.
+- **Workflow**: Performs line-by-line checks against regular expression rulesets, AST statement auditors, and insecure method indices.
+- **Vulnerabilities Detected**: Committed SSH keys, AWS tokens, hardcoded IP configurations, weak crypto hashing, dangerous functions (e.g., `eval`), hardcoded Authorization headers, XML External Entity (XXE) vulnerabilities, **SQL Injections** (`cursor.execute(f"...")`), **Network Infrastructure Smells** (`0.0.0.0` binds, `verify=False` TLS), and **API Contract Security Risks** (`Access-Control-Allow-Origin: *`).
+
+#### Security Auditing Engine & Vulnerability Matrix
+
+| Report ID & File Name | Vulnerability Category | CWE Mapping | Target Source Constructs | Severity Rating | Default Score Weight | Remediation Guideline |
+|---|---|---|---|---|---|---|
+| `01_security_summary` | Consolidated Audit | N/A | Aggregated findings from all checkers | Summary | N/A | Review critical findings first |
+| `02_secrets` | Hardcoded Secrets | CWE-798 | AWS keys, GitHub tokens, Slack webhooks | Critical | 25.0 pts | Invalidate and rotate secrets immediately |
+| `03_credentials` | Embedded Credentials | CWE-259 | Database passwords, API tokens, auth headers | High | 10.0 pts | Move credentials to environment variables |
+| `04_insecure_functions` | Dangerous APIs | CWE-676 | `eval()`, `exec()`, `strcpy()`, `system()` | High / Medium | 10.0 / 3.0 pts | Refactor using safe parsing or subprocess |
+| `05_web_security` | Web Application Smells | CWE-79 | XSS vulnerabilities, dangerous DOM sinks | Medium | 3.0 pts | Sanitize user input before rendering |
+| `06_crypto_security` | Weak Cryptography | CWE-327 | MD5, SHA1, DES, RC4, ECB cipher mode | High / Medium | 10.0 / 3.0 pts | Upgrade to SHA-256 or AES-256-GCM |
+| `07_dependency_security` | Package Risks | CWE-1104 | Outdated or vulnerable external packages | High / Medium | 10.0 / 3.0 pts | Upgrade dependencies to safe releases |
+| `08_configuration_security` | Infrastructure Smells | CWE-16 | Exposed debug flags, missing lock files | Medium / Low | 3.0 / 1.0 pts | Disable debug mode in production |
+| `09_sensitive_files` | Tracked Private Files | CWE-538 | Committed `.env`, `.pem`, `id_rsa`, DB dumps | Critical / High | 25.0 / 10.0 pts | Remove from Git and add to `.gitignore` |
+| `10_scan_metadata` | Audit Logging | N/A | Execution environment context | Info | 0.0 pts | Reference for compliance records |
+| `11_sql_injection_audit` | Dynamic SQL Queries | CWE-89 | `cursor.execute(f"...")`, `%s`, `${id}` | Critical | 25.0 pts | Enforce parameterized queries & ORMs |
+| `12_network_infrastructure_smells` | Network Exposure | CWE-1188 | Global `0.0.0.0` binds, `http://`, `verify=False` | High / Medium | 10.0 / 3.0 pts | Bind to local IPs and enable TLS verification |
+| `13_api_security_audit` | API Contract Smells | CWE-942 | `Access-Control-Allow-Origin: *` headers | Medium | 3.0 pts | Restrict CORS headers to authorized origins |
+
+#### Deep-Dive Security Checker Specifications
+
+1. **Dynamic SQL Injection & Parameterized Execution Audit (`11_sql_injection_audit`)**:
+   - **AST Parsing Rules**: Traverses call sites to database execution methods (`cursor.execute`, `db.query`, `session.execute`, `PDO::query`).
+   - **Vulnerability Triggers**: Flags string interpolation (`f"SELECT ... {var}"`), modulo formatting (`"SELECT ... %s" % var`), string concatenation (`"SELECT ... " + var`), and JS template literals (`` `SELECT ... ${var}` ``).
+   - **Remediation Target**: Enforces parameterized query tuples (e.g., `cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))`).
+
+2. **Network & Infrastructure Security Smells (`12_network_infrastructure_smells`)**:
+   - **Global Bind Detection**: Flags socket binds, Flask/FastAPI app runs, and HTTP servers listening on `0.0.0.0` or `::` (all network interfaces).
+   - **Insecure Transport Protocol**: Identifies unencrypted `http://` API endpoint declarations in production configurations.
+   - **Disabled TLS Verification**: Detects `verify=False` in Python `requests`, `InsecureSkipVerify: true` in Go `tls.Config`, and `rejectUnauthorized: false` in Node.js HTTPS.
+
+3. **API Contract & Endpoint Security Risks (`13_api_security_audit`)**:
+   - **CORS Wildcard Header**: Scans middleware and response headers for `Access-Control-Allow-Origin: *` on authenticated routes.
+   - **Unauthenticated Debug Routes**: Flags API routes containing `debug`, `test`, or `admin` lacking authentication decorators.
+
+#### Production-Grade Security Features
+1. **License Compliance Scanner**: Matches GPL, LGPL, AGPL, MIT, Apache, BSD, and Proprietary keywords to warn about commercial copyleft compatibility.
+2. **File Permission Audit**: Analyzes file permission flags for world-writable scripts or incorrect execution flags on scripts (`.sh`, `.py`).
+3. **Sensitive File Detector**: Scans repository path structures for committed environment configuration keys (`.env`, `.env.production`), certificates, databases, and configuration backups (`id_rsa`, `id_ed25519`, `.pem`, `.p12`, `.keystore`, `credentials.json`, `firebase-admin.json`, `aws-credentials`, `docker-compose.override.yml`).
+4. **Docker & Container Security Scan**: Evaluates container layouts (`Dockerfile`, `docker-compose.yml`) for exposed base tags, missing HEALTHCHECK tags, privileged container settings, or root executing permissions.
+5. **CI/CD Security Scanner**: Scans GitHub Actions pipelines (`.github/workflows/`), GitLab CI configuration, or Azure pipelines workflows for plaintext secrets or unpinned workflows.
+6. **Git Ignore Security Audit**: Compares active repository file extensions against `.gitignore` to alert on tracked configurations or credentials.
+7. **Logging Security Analysis**: Flags logger output lines (`logger.info`, `console.log`) containing variable references to passwords, tokens, hashes, or credentials to prevent leaks.
+8. **Unsafe File Operation Detection**: Detects potentially vulnerable filesystem paths or calls (recursive directories wipe, path string concatenation vulnerabilities).
+9. **Security Best Practices Audit**: Inspects the workspace root for missing lock files, license declarations, environment configs, or gitignore specifications.
+10. **Cryptographic Key Detection**: Audits and classifies committed public, private, or certificate keys (`-----BEGIN ... KEY-----` or `-----BEGIN CERTIFICATE-----`).
+11. **Secret Vault Encryption Engine**: Provides an offline, zero-trust file encryption vault using **AES-256-GCM** authenticated cipher and **scrypt** key derivation.
+
+#### Secret Vault Architecture
+The Secret Vault feature enables zero-trust, client-side encryption for sensitive workspace files (such as `.env`, `credentials.json`, `*.pem`, `id_rsa`, etc.) without transmitting data to external servers or storing raw encryption keys.
+
+```mermaid
+graph TD
+    subgraph Master Password Key Derivation
+        MP[Master Password] --> KDF[scrypt KDF<br/>N=32768, r=8, p=1]
+        Salt[16-Byte Random Salt<br/>os.urandom(16)] --> KDF
+        KDF --> Key[256-bit Encryption Key<br/>32 Bytes]
+    end
+
+    subgraph Verification Token Check
+        Key --> TokenCipher[AES-256-GCM<br/>Nonce: 12 Bytes]
+        VerifyToken[VERIFY_TOKEN<br/>ARCHON_VAULT_VERIFY_TOKEN] --> TokenCipher
+        TokenCipher --> SavedMeta[archon-vault.json<br/>kdf_salt, verify_nonce, verify_ciphertext]
+    end
+
+    subgraph File Encryption Pipeline
+        File[Plaintext File<br/>.env / credentials.json] --> FileCipher[AES-256-GCM Cipher]
+        Key --> FileCipher
+        FileNonce[12-Byte Random Nonce<br/>os.urandom(12)] --> FileCipher
+        FileCipher --> Header[Magic Header<br/>ARCHON_VAULT_V1]
+        Header --> EncryptedFile[Encrypted File Output<br/>ARCHON_VAULT_V1 + Nonce + Ciphertext + Tag]
+    end
+```
+
+#### Cryptographic Specifications
+1. **Key Derivation (KDF)**:
+   - Derives a 256-bit (32-byte) key using `hashlib.scrypt(password, salt=salt, N=32768, r=8, p=1, dklen=32)`.
+   - Generates a unique 16-byte random salt per vault instance.
+   - Master password and derived keys are **never stored** in plaintext on disk or in configuration files.
+2. **Authenticated Encryption (AES-256-GCM)**:
+   - Files are encrypted using `cryptography.hazmat.primitives.ciphers.aead.AESGCM`.
+   - Generates a fresh 12-byte random IV/nonce per file encryption operation.
+   - Encrypted file format: `ARCHON_VAULT_V1` (15 bytes) + `Nonce` (12 bytes) + `Ciphertext + Tag` (16 bytes GCM tag).
+3. **Password Verification & Tamper Detection**:
+   - Verification token (`b"ARCHON_VAULT_VERIFY_TOKEN"`) encrypted with AES-256-GCM stored in `archon-vault.json`.
+   - Decryption failure (due to incorrect password or file tampering) raises an authentication error and preserves original files untouched.
+4. **Re-Encryption Password Change (`change-password`)**:
+   - Decrypts all protected files into memory using the old key, derives a new key with a fresh 16-byte salt, and re-encrypts all files with fresh nonces.
+
+---
 
 ### Module 03: Code Analysis
-Measures cyclomatic complexity, cognitive nesting levels, code duplication, and architectural smells.
-- **Workflow**: Builds abstract syntax mappings and measures nested block logic.
-- **Smells detected**: God Function, Lazy Class, Message Chains, Empty catch/except, Empty Classes, and Deep Nesting.
-- **Reports**: Quality Summary, Complexity Analysis, Function Analysis, Class Analysis, Dependency Mapping, Duplicated Code, Architectural Integrity, Code Smells, Maintainability Index, Metadata.
+Measures cyclomatic complexity, cognitive nesting levels, code duplication, architectural smells, symbol naming conventions, recursion risks, resource leaks, error handling smells, structural smells, concurrency safety, and dead code.
+- **Workflow**: Builds abstract syntax tree (AST) mappings, analyzes call graphs, tokenizes line sequences, and measures control flow complexity.
+
+#### Code Quality & Architectural Smell Matrix
+
+| Report ID & File Name | Analysis Feature / Smell Name | Calculation Formula / Metric | Default Threshold | Severity Rating | Refactoring Impact & Guidance |
+|---|---|---|---|---|---|
+| `01_quality_summary` | Overall Quality | Composite index of MI, CC, smells | N/A | Summary | Target Grade A (Score ≥ 80) |
+| `02_complexity_analysis` | Cyclomatic Complexity | $CC = E - N + 2P = 1 + \text{Decisions}$ | $CC > 15$ | High / Critical | Split branching logic into helper functions |
+| `03_function_analysis` | Long Function | Function Physical LOC | $> 100$ LOC | Medium | Decompose method using Extract Method |
+| `04_class_analysis` | Large Class | Class Physical LOC | $> 500$ LOC | High | Break God Class into specialized components |
+| `05_dependency_analysis` | High Import Density | Internal / External Imports Count | $> 20$ imports | Medium | Reduce coupling via Facade or DI patterns |
+| `06_duplication_analysis` | Code Duplication | Sliding window Rabin-Karp MD5 | $> 5.0\%$ match | High | Deduplicate code into shared utilities |
+| `07_architecture_analysis` | Circular Dependencies | Import graph cycle $A \to B \to A$ | Any cycle | Critical | Resolve cycles via dependency inversion |
+| `08_code_smells` | Architectural Smells | Heuristic pattern rulesets | Threshold dependent | High / Medium | Apply targeted structural refactorings |
+| `09_maintainability` | Maintainability Index | $MI = 171 - 5.2\ln(V) - 0.23CC \dots$ | $MI < 50.0$ | High | Overhaul complex low-MI source files |
+| `10_scan_metadata` | Scanner Settings Log | Rules version & runner configuration | Info | Info | Historical audit record |
+| `11_naming_conventions` | Style Enforcement | AST Symbol Regex Rules | Language specific | Medium | Enforce PascalCase, snake_case, UPPER_CASE |
+| `12_recursive_calls` | Stack Overflow Risk | Call-graph self-invocations $f(x) \to f(x)$ | Any un-guarded recursion | High / Critical | Verify base case guards or convert to iteration |
+| `13_memory_resource_leaks` | Resource Allocation Leak | Unclosed `open()`, `malloc()`, sockets | Any raw descriptor | High | Enforce `with` context managers and `free()` |
+| `14_error_handling_smells` | Exception Swallowing | Bare `except: pass`, empty `catch` | Any swallowed exception | High | Log exceptions or re-raise explicitly |
+| `15_structural_smells` | God Methods & Classes | LOC & method count bounds | $> 100$ LOC / $> 500$ LOC | High | Modularize large classes and functions |
+| `16_concurrency_thread_safety` | Concurrency Risks | Lock acquire without `finally` | Any raw `lock.acquire()` | High / Critical | Enforce `with lock:` or `finally: release()` |
+| `17_dead_code_unused_symbols` | Unused Internal Symbols | Unreferenced internal routines | Any dead symbol | Low / Medium | Remove unreferenced functions and modules |
+
+#### Deep-Dive Code Analysis Specifications
+
+1. **Naming Conventions & Style Enforcement (`11_naming_conventions`)**:
+   - **Classes**: Enforces `PascalCase` across Python, Java, TypeScript, C++, Go, and Rust (e.g., `UserManager`). Snake-case names like `user_manager` trigger Medium severity warnings.
+   - **Functions & Methods**: Enforces `snake_case` for Python and Rust (e.g., `calculate_metrics`), and `camelCase` for JavaScript, TypeScript, Java, and Go (e.g., `calculateMetrics`).
+   - **Constants**: Global uppercase variables must adhere strictly to `UPPER_CASE` (e.g., `MAX_RETRY_ATTEMPTS`).
+
+2. **Recursive Calls & Call Depth Risk (`12_recursive_calls`)**:
+   - Inspects AST function body call graphs for direct self-invocations ($f(x) \to f(x-1)$) and mutual recursive loops ($A \to B \to A$).
+   - Evaluates base case condition guards to prevent unbounded call stack growth and runtime `RecursionError` / stack overflow panics.
+
+3. **Memory Heavy & Resource Allocation Auditor (`13_memory_resource_leaks`)**:
+   - Identifies unclosed file descriptors (e.g., raw `open()` calls without `with` context managers), `malloc()` memory allocations without matching `free()`, unclosed database cursors, and socket memory leaks.
+
+4. **Error Handling & Exception Swallowing Smells (`14_error_handling_smells`)**:
+   - Flags bare `except: pass`, empty `catch (e) {}` blocks, ignored error return values in Go (`_ = fn()`), and unhandled async promise rejections.
+
+5. **Structural & Object-Oriented Smell Analyzer (`15_structural_smells`)**:
+   - Flags God Methods (> 100 LOC), Large Classes (> 500 LOC), Deep Inheritance Trees (depth > 3 levels), and Long Parameter Lists (> 5 parameters).
+
+6. **Concurrency & Thread Safety Analyzer (`16_concurrency_thread_safety`)**:
+   - Detects thread lock acquisitions missing `finally` or context manager releases (`lock.acquire()` without `lock.release()`), synchronous blocking I/O calls inside `async def` event loops, and un-synchronized global state mutations.
+
+7. **Dead Code & Unused Symbol Discovery (`17_dead_code_unused_symbols`)**:
+   - Scans repository symbol tables to identify internal helper functions and private classes that are never referenced across the scanned codebase.
 
 ### Module 04: Contributor Analysis
 Traces contribution transactions, code ownership, activity history, and knowledge silos.
@@ -521,10 +715,42 @@ graph TD
 | **Database** | `table_name`, `columns`, `operations` | SQL/NoSQL schemas, tables, and CRUD operations. | `reads`/`writes` (Database Table) |
 | **Configuration** | `name`, `parameters_dict`, `dialect` | Parsed environment files and configs. | `configures` (Repository, Files) |
 
-- **Deliverables**:
-  - `nodes.json` / `edges.json`: Raw graph arrays suitable for visualization frameworks (d3.js, cytoscape) or network analysis libraries (NetworkX).
-  - `graph_statistics.json`: Graph metrics including density, maximum/average degrees, count breakdown, and depth.
-  - `repository_map.md`: Clickable Markdown overview representing file directory nesting levels and key class linkages.
+- **Directed Edge Classifications & Semantic Relationships**:
+
+| Edge Type | Source Entity | Target Entity | Contextual Attributes | Architectural Significance |
+|---|---|---|---|---|
+| `contains` | Repository / Folder | Folder / File | `relative_path`, `depth` | Represents file system directory hierarchy. |
+| `defines` | File / Class | Class / Function / Method | `line_number`, `visibility` | Maps code structure declarations within files. |
+| `imports` | File | File / Package | `import_alias`, `is_relative` | Maps internal module dependencies and coupling. |
+| `inherits` | Class | Base Class / Interface | `inheritance_type` | Tracks class hierarchies and OO polymorphic trees. |
+| `calls` | Function / Method | Function / Method | `call_line`, `is_async` | Reconstructs dynamic execution call graphs. |
+| `exposes` | Function / Method | API Endpoint | `http_verb`, `route_path` | Identifies web API routing entry points. |
+| `reads` / `writes` | Method / Function | Database Table | `query_type` (SELECT/INSERT/UPDATE) | Connects code routines to database schemas. |
+| `configures` | Config File | Repository / Module | `config_key`, `env_var` | Maps global environment dependencies. |
+
+- **Deliverables & Deliverable Schemas Matrix Table**:
+
+| Deliverable File Name | Format | Primary Contents & JSON Schemas | Graph Metrics & Algorithms | Primary Use Case & System Utility |
+|---|---|---|---|---|
+| `graph_summary.txt` / `.json` | TXT / JSON | Executive architecture overview, top connected nodes | Degree Centrality & PageRank | Quick CLI architecture summary |
+| `nodes.json` | JSON | Full array of graph node vertices (`id`, `type`, `attributes`) | Topological Node Catalog | Feed visualizers (d3.js, Cytoscape) |
+| `edges.json` | JSON | Full array of directed edges (`source`, `target`, `type`) | Relational Adjacency List | Dependency & call graph analysis |
+| `symbols.json` | JSON | Comprehensive catalog of extracted classes and functions | AST Symbol Dictionary | Code intelligence & auto-complete |
+| `imports.json` | JSON | Direct and transitive import relationships | Tarjan's Strongly Connected Components | Circular import cycle detection |
+| `packages.json` | JSON | Package hierarchy and structural coupling metrics | Afferent ($C_a$) & Efferent ($C_e$) Coupling | Instability score $I = \frac{C_e}{C_a + C_e}$ |
+| `dependencies.json` | JSON | External libraries and internal module dependency tree | Depth Traversal & Cycle Detection | Supply chain & vulnerability isolation |
+| `apis.json` | JSON | Web API endpoints, routes, methods, and handlers | HTTP Route Map | API documentation & security audits |
+| `database.json` | JSON | Database tables, models, and CRUD access operations | Data Access Graph | Database refactoring & schema mapping |
+| `configurations.json` | JSON | Environment variables, config files, and feature flags | Configuration Dependency Graph | Secret tracking & environment audits |
+| `graph_statistics.json` | JSON | Top-level graph metrics ($|V|$, $|E|$, density, degree) | Density $\frac{2|E|}{|V|(|V|-1)}$, Avg Degree | System health & complexity indexing |
+| `repository_map.md` | Markdown | Clickable directory map with linked symbols | Directory Tree Generator | Markdown navigation for developers |
+
+- **Graph Algorithms & Topological Metrics**:
+  1. **Graph Density**: Calculated as $D = \frac{2|E|}{|V|(|V|-1)}$. High density ($D > 0.1$) indicates tight coupling across codebase modules.
+  2. **Afferent & Efferent Coupling**: Calculates Afferent Coupling ($C_a$, incoming dependencies) and Efferent Coupling ($C_e$, outgoing dependencies) per package to compute Instability ($I = \frac{C_e}{C_a + C_e}$).
+  3. **Tarjan's Strongly Connected Components Algorithm**: Identifies cycles in the directed import graph to flag circular dependencies ($A \to B \to A$).
+  4. **Degree Centrality / Hub Analysis**: Measures total incoming and outgoing degree ($k_i = \text{deg}(v_i)$) to flag "Hub Files" and "God Components" that carry critical dependency weight.
+
 - **Customization Settings**:
   - `knowledge_graph.include_classes` (default `true`): Include classes, interfaces, enums, and structs.
   - `knowledge_graph.include_functions` (default `true`): Include standalone functions, object methods, and constructors.
@@ -2477,6 +2703,12 @@ One unified table listing every report generated by Archon One across all module
 | SEC-025 | Strcpy Usage | High | `\bstrcpy\s*\(` | `.c`, `.cpp`, `.h` | Replace with `strncpy` or `strlcpy` |
 | SEC-026 | Hardcoded Authorization Token | Critical | `Authorization` header containing token | All files | Do not commit auth credentials; load at runtime |
 | SEC-027 | Potential XXE Vulnerability | Medium | Insecure XML parser library imports | Python, C/C++ files | Use `defusedxml` package to prevent entity expansion |
+| SEC-028 | Dynamic SQL Injection | Critical | `cursor.execute(f"...")` or `%s` format strings in queries | All files | Use parameterized queries and ORM prepared statements |
+| SEC-029 | Global Bind Address Exposure | High | Socket or server listening on `0.0.0.0` | Config/Source files | Bind server to `127.0.0.1` or internal VPC interface |
+| SEC-030 | Insecure HTTP Transport | Medium | Unencrypted `http://` endpoint configuration | All files | Migrate API communications to encrypted HTTPS/TLS |
+| SEC-031 | Disabled TLS Verification | High | `verify=False` or `InsecureSkipVerify: true` | All files | Re-enable SSL/TLS certificate validation |
+| SEC-032 | CORS Wildcard Origin | High | `Access-Control-Allow-Origin: *` header | API/Web files | Restrict CORS allowed origins to trusted domain lists |
+| SEC-033 | Secret Vault Protection | Critical | Sensitive file (`.env`, `*.pem`) committed unencrypted | Workspace root | Encrypt file using `archon vault mask` |
 
 </details>
 

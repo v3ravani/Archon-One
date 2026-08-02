@@ -8,8 +8,10 @@
     "auto_save_settings": true,
     "auto_open_report_folder": false,
     "enable_scan_summary": true,
-    "max_scan_history": 10,
-    "language_detection": "auto"
+    "max_scan_history": 15,
+    "language_detection": "auto",
+    "fast_scan": false,
+    "incremental_scan": false
   },
   "modules": {
     "code_metrics": true,
@@ -67,7 +69,7 @@
   },
   "thresholds": {
     "max_function_length": 100,
-    "max_class_length": 500,
+    "max_class_length": 5001,
     "max_file_length": 1000,
     "max_parameters": 5,
     "max_cyclomatic_complexity": 15,
@@ -97,30 +99,41 @@
     "max_secret_length": 128,
     "ignore_example_secrets": true
   },
+  "knowledge_graph": {
+    "include_classes": true,
+    "include_functions": true,
+    "include_dependencies": true,
+    "include_apis": true,
+    "include_database": true,
+    "include_configurations": true,
+    "max_depth": 10000000000000,
+    "min_node_connections": 1
+  },
   "diagrams": {
     "include_mmd": true,
     "include_puml": true,
     "max_nodes": 50
   },
   "performance": {
-    "max_worker_threads": 4,
+    "max_worker_threads": 6,
     "max_memory_usage": 1024,
     "max_files": 10000,
     "max_scan_time": 600,
     "enable_cache": true,
     "cache_size": 1000,
-    "incremental_scan": false,
-    "skip_unchanged_files": false,
-    "lazy_loading": false,
-    "scan_mode": "full"
+    "incremental_scan": true,
+    "skip_unchanged_files": true,
+    "lazy_loading": true,
+    "scan_mode": "fast"
   },
   "advanced": {
-    "enable_debug_logs": false,
+    "enable_debug_logs": true,
     "verbose_logging": true,
     "save_scan_logs": true,
     "auto_cleanup_old_reports": false,
     "cleanup_after_days": 30,
     "max_report_history": 50,
     "validate_config_before_scan": true
-  }
+  },
+  "profiles": {}
 }

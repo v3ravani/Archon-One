@@ -187,9 +187,13 @@
                 </div>
 
                 <div class="doc-sub-item">
-                    <h3>Unified Reports</h3>
-                    <p>Saves individual text/JSON files per category, and consolidates them into a single interactive
-                        HTML file.</p>
+                    <h3>Unified Reports & Command Profiles</h3>
+                    <p>Saves individual text/JSON files per category, consolidates them into a single interactive HTML report, and supports custom Command Profile shortcuts.</p>
+                </div>
+
+                <div class="doc-sub-item">
+                    <h3>Secret Vault (AES-256-GCM Protection)</h3>
+                    <p>Provides an offline, zero-trust file encryption vault to protect sensitive workspace files (such as <code>.env</code>, <code>credentials.json</code>, <code>*.pem</code>) using AES-256-GCM authenticated encryption and scrypt key derivation from both the Web Dashboard and CLI.</p>
                 </div>
             </section>
 
@@ -286,6 +290,42 @@ pip install -e ".[dev]"</code></pre>
                                     <td>Clones a remote repository to a temp directory, scans it, writes output reports,
                                         and cleans up.</td>
                                 </tr>
+                                 <tr>
+                                     <td><code>profiles</code></td>
+                                     <td><code>archon profiles</code></td>
+                                     <td>None</td>
+                                     <td>Checks and lists all saved Command Profiles and their command sequences.</td>
+                                 </tr>
+                                 <tr>
+                                     <td><code>vault status</code></td>
+                                     <td><code>archon vault status</code></td>
+                                     <td>None</td>
+                                     <td>Displays Secret Vault status, master password state, and list of protected files.</td>
+                                 </tr>
+                                 <tr>
+                                     <td><code>vault mask</code></td>
+                                     <td><code>archon vault mask [file]</code></td>
+                                     <td><code>[file]</code></td>
+                                     <td>Encrypts and masks a sensitive workspace file (such as <code>.env</code> or <code>credentials.json</code>) using AES-256-GCM.</td>
+                                 </tr>
+                                 <tr>
+                                     <td><code>vault unmask</code></td>
+                                     <td><code>archon vault unmask [file]</code></td>
+                                     <td><code>[file]</code></td>
+                                     <td>Decrypts and unmasks a protected file using master password.</td>
+                                 </tr>
+                                 <tr>
+                                     <td><code>vault change-password</code></td>
+                                     <td><code>archon vault change-password</code></td>
+                                     <td>None</td>
+                                     <td>Updates vault master password and re-encrypts all protected files securely with new derived key.</td>
+                                 </tr>
+                                 <tr>
+                                     <td><code>&lt;profile_name&gt;</code></td>
+                                     <td><code>archon &lt;profile_name&gt;</code></td>
+                                     <td>None</td>
+                                     <td>Executes a saved Command Profile sequence of Archon CLI commands in order (e.g. <code>archon backend</code>).</td>
+                                 </tr>
                                 <tr>
                                     <td><code>settings</code></td>
                                     <td><code>archon settings [options]</code></td>
@@ -397,6 +437,12 @@ pip install -e ".[dev]"</code></pre>
                                     <td>Security</td>
                                     <td><code>"Low"</code></td>
                                     <td>Filter level: Critical, High, Medium, Low, Informational.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>profiles</code></td>
+                                    <td>Command Profiles</td>
+                                    <td><code>{}</code></td>
+                                    <td>Custom command profile mappings to lists of Archon CLI commands (e.g. <code>{"backend": ["archon analyze --architecture", "archon analyze --metrics", "archon export --html"]}</code>).</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -707,6 +753,23 @@ pip install -e ".[dev]"</code></pre>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="doc-sub-item" style="margin-top: 20px;">
+                    <h3>Knowledge Graph 12-File Output Directory Structure</h3>
+                    <p>Every analysis generates a self-contained <code>knowledge-graph/</code> directory with 12 structured JSON files:</p>
+                    <pre><code>knowledge-graph/
+├── metadata.json           # Repository summary, LOC, framework, and commit hash
+├── nodes.json              # Primary source of truth for all graph vertices
+├── edges.json              # Primary source of truth for directed relationships
+├── files.json              # Detailed file metrics, SHA256 hashes, imports, source code
+├── folders.json            # Directory hierarchy, child files/folders, folder LOC
+├── classes.json            # Class definitions, inheritance, methods, fields, complexity
+├── functions.json          # Functions, parameters, return types, callers/callees, complexity
+├── dependencies.json       # External and internal package dependencies
+├── call-graph.json         # Function call invocations (Sync/Async) and line numbers
+├── api-endpoints.json      # Discovered HTTP routes, methods, handlers, and schemas
+├── metrics.json            # Aggregated repository metrics & maintainability index
+└── diagnostics.json        # Security findings, circular imports, rule IDs, and fixes</code></pre>
                 </div>
             </section>
 

@@ -28,6 +28,8 @@ EXTENSION_TO_LANGUAGE = {
     '.yaml': 'yaml',
     '.yml': 'yaml',
     '.md': 'markdown',
+    '.go': 'go',
+    '.rs': 'rust',
 }
 
 # Mapping of language IDs to names for reports
@@ -47,6 +49,8 @@ LANGUAGE_NAMES = {
     'json': 'JSON',
     'yaml': 'YAML',
     'markdown': 'Markdown',
+    'go': 'Go',
+    'rust': 'Rust',
 }
 
 # Comment and string delimiters rules for each language
@@ -125,6 +129,16 @@ LANGUAGE_RULES = {
         'line_comments': [],
         'block_comments': [('<!--', '-->')],
         'string_delims': ['`']
+    },
+    'go': {
+        'line_comments': ['//'],
+        'block_comments': [('/*', '*/')],
+        'string_delims': ['"', "'", '`']
+    },
+    'rust': {
+        'line_comments': ['//'],
+        'block_comments': [('/*', '*/')],
+        'string_delims': ['"', "'"]
     }
 }
 

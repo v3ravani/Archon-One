@@ -1,7 +1,7 @@
 # Archon One - Enterprise Code Analysis, Security Auditing & Repository Intelligence Platform
 
 [![PyPI](https://img.shields.io/pypi/v/archon)](https://pypi.org/project/archon-one/)
-![License](https://img.shields.io/github/license/v3ravani/archon)
+[![License](https://img.shields.io/badge/License-View%20License-blue)](https://github.com/v3ravani/archon/blob/main/LICENSE)
 ![Code Analysis](https://img.shields.io/badge/Code%20Analysis-Automated-blue)
 ![Security Auditing](https://img.shields.io/badge/Security%20Auditing-Integrated-green)
 
